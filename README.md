@@ -1,6 +1,9 @@
 # ocaml-c3
 OCaml bindings for the Javascript c3 charting library
 
+- The [C3 library](http://c3js.org/)
+- The [OCaml demo](http://djs55.github.io/ocaml-c3/index.html)
+
 # Getting started
 
 1. install all the dependencies, for example by:
