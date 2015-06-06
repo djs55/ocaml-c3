@@ -20,11 +20,24 @@ let get_by_id id =
   Js.Opt.get (d##getElementById(Js.string id))
     (fun () -> assert false)
 
+let rec update_graph_forever chart t () =
+  let data = (
+      [ t ],
+      [ {
+          C3.label = "sin(t)";
+          values = [ sin t ];
+          ty = C3.Area_step
+        } ]
+  ) in
+  C3.flow chart ~flow_to:(`Delete 0) data;
+  Lwt_js.sleep 0.1
+  >>= fun () ->
+  update_graph_forever chart (t +. 0.1) ()
 
 let render () =
   Firebug.console##log (Js.string "rendering...");
   let chart = C3.generate "#chart" C3.example in
-
+  Lwt.async (update_graph_forever chart 0.);
   Firebug.console##log (Js.string "... render complete")
 
 let _ =

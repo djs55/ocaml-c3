@@ -130,7 +130,7 @@ type flow_to = [
   | `Delete of int
 ]
 
-let flow chart ?(flow_to = `OneInOneOut) cols =
+let flow chart ?(flow_to = `OneInOneOut) cols : unit =
   let arg =
     Js.Unsafe.(obj
       (Array.of_list
