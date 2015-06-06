@@ -28,3 +28,7 @@ doc: setup.data setup.bin
 setup.bin: setup.ml
 	ocamlopt.opt -o $@ $< || ocamlopt -o $@ $< || ocamlc -o $@ $<
 	$(RM) setup.cmx setup.cmi setup.o setup.cmo
+
+.PHONY: run
+run:
+	(cd example; cohttp-server-lwt)

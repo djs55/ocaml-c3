@@ -7,9 +7,16 @@ License:     ISC
 Synopsis:    OCaml bindings for the Javascript C3 charting library
 Plugins:     META (0.3)
 BuildTools:  ocamlbuild
+PostBuildCommand: ./makejs.sh
 
 Library c3
   Path:               lib
   Modules:            C3
   BuildDepends:       js_of_ocaml,js_of_ocaml.syntax
 
+Executable example
+  Path:               example
+  MainIs:             main.ml
+  CompiledObject:     byte
+  Install:            false
+  BuildDepends: js_of_ocaml,js_of_ocaml.syntax,lwt,c3
