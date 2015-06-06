@@ -39,14 +39,14 @@ type data = {
   columns: (float list) * column list;
 }
 
-let example = {
+let empty = {
   x_axis = Some {
     ty = Timeseries;
     format = "%m/%d";
   };
   columns = (
     [],
-    [ { label = "host free memory";
+    [ { label = "";
         values = [];
         ty = Area_step;
       } ]

@@ -35,10 +35,10 @@ let rec update_graph_forever chart t () =
   update_graph_forever chart (t +. 0.1) ()
 
 let render () =
-  Firebug.console##log (Js.string "rendering...");
-  let chart = C3.generate "#chart" C3.example in
-  Lwt.async (update_graph_forever chart 0.);
-  Firebug.console##log (Js.string "... render complete")
+  (* Create an empty chart in the #chart div *)
+  let chart = C3.generate "#chart" C3.empty in
+  (* Update it in the background *)
+  Lwt.async (update_graph_forever chart 0.)
 
 let _ =
   Dom_html.window##onload <- Dom_html.handler
