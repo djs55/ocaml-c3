@@ -20,13 +20,32 @@ let get_by_id id =
   Js.Opt.get (d##getElementById(Js.string id))
     (fun () -> assert false)
 
+let xychart () =
+  let spec = { C3.Data.empty with
+    C3.Data.x_axis = Some {
+      C3.Axis.ty = C3.Axis_type.Line;
+      format = "%d";
+    };
+    columns = (
+      [ 0.1; 0.2; 0.3 ],
+      [ { C3.Column.label = "";
+          values = [0.1; 0.2; 0.3];
+          ty = C3.Column_type.Line;
+        } ]
+    )
+  } in
+  let _ = C3.generate "#xychart" spec in
+  ()
+
 let rec update_graph_forever chart t () =
+  if t > 10. then return ()
+  else
   let data = (
       [ t ],
       [ {
-          C3.label = "sin(t)";
+          C3.Column.label = "sin(t)";
           values = [ sin t ];
-          ty = C3.Area_step
+          ty = C3.Column_type.Area_step
         } ]
   ) in
   C3.flow chart ~flow_to:(`Delete 0) data;
@@ -34,15 +53,20 @@ let rec update_graph_forever chart t () =
   >>= fun () ->
   update_graph_forever chart (t +. 0.1) ()
 
-let render () =
-  (* Create an empty chart in the #chart div *)
-  let chart = C3.generate "#chart" C3.empty in
-  (* Update it in the background *)
+let timeseries () =
+  let spec = { C3.Data.empty with
+    C3.Data.x_axis = Some {
+      C3.Axis.ty = C3.Axis_type.Timeseries;
+      format = "%m/%d";
+    }
+  } in
+  let chart = C3.generate "#timeserieschart" spec in
   Lwt.async (update_graph_forever chart 0.)
 
 let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
-      render ();
+(*      xychart (); *)
+      timeseries ();
       Js._true
     )
