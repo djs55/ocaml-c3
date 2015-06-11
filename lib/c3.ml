@@ -30,9 +30,21 @@ module Column_type = struct
     | Area_step -> "area-step"
 end
 
+module Tic = struct
+  type t = [
+    | `Time of float (* seconds since epoch *)
+    | `X of float
+  ]
+
+  let to_float = function
+    | `Time t -> t *. 1000. (* JS takes milliseconds since epoch *)
+    | `X x -> x
+end
+
 module Column = struct
   type t = {
     label: string;
+    tics: Tic.t list;
     values: float list;
     ty: Column_type.t;
   }
@@ -55,38 +67,28 @@ module Axis = struct
   }
 end
 
-module Tic = struct
-  type t = [
-    | `Time of float (* seconds since epoch *)
-    | `X of float
-  ]
-
-  let to_float = function
-    | `Time t -> t *. 1000. (* JS takes milliseconds since epoch *)
-    | `X x -> x
-end
 
 
 module Data = struct
   type t = {
     x_axis: Axis.t option;
-    columns: (Tic.t list) * Column.t list;
+    columns: Column.t list;
   }
 
   let empty = {
     x_axis = None;
-    columns = (
-      [],
+    columns =
       [ { Column.label = "";
+          tics = [];
           values = [];
           ty = Column_type.Line;
         } ]
-    )
   }
 end
 
 
-let js_of_columns (tics, columns) =
+let js_of_columns columns =
+  let tics = List.concat (List.map (fun c -> c.Column.tics) columns) in
   let data_columns =
     Js.Unsafe.(
       List.map (fun column ->
@@ -130,7 +132,7 @@ let generate bindto data =
           "columns", columns;
           "types", obj (Array.of_list (List.map (fun column ->
             column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
-          ) (snd data.Data.columns)));
+          ) data.Data.columns));
         ]
       ) in
 
