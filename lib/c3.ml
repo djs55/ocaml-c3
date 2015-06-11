@@ -53,10 +53,22 @@ module Axis = struct
   }
 end
 
+module Tic = struct
+  type t = [
+    | `Time of float (* seconds since epoch *)
+    | `X of float
+  ]
+
+  let to_float = function
+    | `Time t -> t *. 1000. (* JS takes milliseconds since epoch *)
+    | `X x -> x
+end
+
+
 module Data = struct
   type t = {
     x_axis: Axis.t option;
-    columns: (float list) * Column.t list;
+    columns: (Tic.t list) * Column.t list;
   }
 
   let empty = {
@@ -85,21 +97,13 @@ let js_of_columns (tics, columns) =
       match tics with
       | [] -> data_columns
       | tics ->
-        let tics = Js.array (Array.of_list (inject (Js.string "x") :: (List.map (fun x -> inject x) tics))) in
+        let tics = Js.array (Array.of_list (inject (Js.string "x") :: (List.map (fun x -> inject (Tic.to_float x)) tics))) in
         tics :: data_columns
     )))
   )
 
 let generate bindto data =
-  let columns =
-    match data.Data.x_axis with
-    | Some { Axis.ty = Axis_type.Timeseries } ->
-      (* We pass the times to js as floats, in milliseconds *)
-      let tics, columns = data.Data.columns in
-      List.map (fun x -> 1000.0 *. x) tics, columns
-    | _ ->
-      data.Data.columns in
-  let columns = js_of_columns columns in
+  let columns = js_of_columns data.Data.columns in
 
   let axis =
     Js.Unsafe.(
@@ -159,5 +163,4 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
         @ [ "columns", js_of_columns cols ])
       )
     ) in
-  Firebug.console##log(arg);
   Js.Unsafe.meth_call chart "flow" [| arg |]

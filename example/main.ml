@@ -27,7 +27,7 @@ let xychart () =
       format = "%d";
     };
     columns = (
-      [ 0.1; 0.2; 0.3 ],
+      [ `X 0.1; `X 0.2; `X 0.3 ],
       [ { C3.Column.label = "";
           values = [0.1; 0.2; 0.3];
           ty = C3.Column_type.Line;
@@ -41,7 +41,7 @@ let rec update_graph_forever chart t () =
   if t > 10. then return ()
   else
   let data = (
-      [ t ],
+      [ `Time t ],
       [ {
           C3.Column.label = "sin(t)";
           values = [ sin t ];
@@ -66,7 +66,7 @@ let timeseries () =
 let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
-(*      xychart (); *)
+      xychart ();
       timeseries ();
       Js._true
     )
