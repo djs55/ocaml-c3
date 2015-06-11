@@ -67,6 +67,7 @@ let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
       xychart C3.Column_type.Line "#xychart";
+      xychart C3.Column_type.Area "#xyareachart";
       xychart C3.Column_type.Spline "#xysplinechart";
       timeseries ();
       Js._true
