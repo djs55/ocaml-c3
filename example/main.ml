@@ -68,6 +68,7 @@ let _ =
     (fun _ ->
       xychart C3.Column_type.Line "#xychart";
       xychart C3.Column_type.Area "#xyareachart";
+      xychart C3.Column_type.Area_step "#xyareastepchart";
       xychart C3.Column_type.Spline "#xysplinechart";
       timeseries ();
       Js._true
