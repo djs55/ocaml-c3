@@ -20,21 +20,21 @@ let get_by_id id =
   Js.Opt.get (d##getElementById(Js.string id))
     (fun () -> assert false)
 
-let xychart () =
+let xychart ty name =
   let spec = { C3.Data.empty with
     C3.Data.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
     };
     columns = (
-      [ `X 0.1; `X 0.2; `X 0.3 ],
+      [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ],
       [ { C3.Column.label = "";
-          values = [0.1; 0.2; 0.3];
-          ty = C3.Column_type.Line;
+          values = [0.1; 0.2; 0.3; 0.2; 0.1];
+          ty;
         } ]
     )
   } in
-  let _ = C3.generate "#xychart" spec in
+  let _ = C3.generate name spec in
   ()
 
 let rec update_graph_forever chart t () =
@@ -66,7 +66,8 @@ let timeseries () =
 let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
-      xychart ();
+      xychart C3.Column_type.Line "#xychart";
+      xychart C3.Column_type.Spline "#xysplinechart";
       timeseries ();
       Js._true
     )

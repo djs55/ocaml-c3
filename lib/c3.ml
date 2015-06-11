@@ -17,12 +17,14 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 module Column_type = struct
   type t =
     | Line
+    | Spline
     | Area
     | Area_spline
     | Area_step
 
   let to_string = function
     | Line -> "line"
+    | Spline -> "spline"
     | Area -> "area"
     | Area_spline -> "area-spline"
     | Area_step -> "area-step"
