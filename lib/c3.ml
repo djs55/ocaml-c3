@@ -14,59 +14,81 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 *)
 
-type column_type =
-  | Line
-  | Area
-  | Area_spline
-  | Area_step
+module Column_type = struct
+  type t =
+    | Line
+    | Area
+    | Area_spline
+    | Area_step
 
-type column = {
-  label: string;
-  values: float list;
-  ty: column_type;
-}
+  let to_string = function
+    | Line -> "line"
+    | Area -> "area"
+    | Area_spline -> "area-spline"
+    | Area_step -> "area-step"
+end
 
-type axis_ty =
-  | Timeseries
+module Column = struct
+  type t = {
+    label: string;
+    values: float list;
+    ty: Column_type.t;
+  }
+end
 
-type axis = {
-  ty: axis_ty;
-  format: string; (* eg '%m/%d' *)
-}
+module Axis_type = struct
+  type t =
+    | Timeseries
+    | Line
 
-type data = {
-  x_axis: axis option;
-  columns: (float list) * column list;
-}
+  let to_string = function
+    | Timeseries -> "timeseries"
+    | Line -> "line"
+end
 
-let empty = {
-  x_axis = Some {
-    ty = Timeseries;
-    format = "%m/%d";
-  };
-  columns = (
-    [],
-    [ { label = "";
-        values = [];
-        ty = Area_step;
-      } ]
-  )
-}
+module Axis = struct
+  type t = {
+    ty: Axis_type.t;
+    format: string; (* eg '%m/%d' *)
+  }
+end
 
-let string_of_column_type = function
-  | Line -> "line"
-  | Area -> "area"
-  | Area_spline -> "area-spline"
-  | Area_step -> "area-step"
+module Tic = struct
+  type t = [
+    | `Time of float (* seconds since epoch *)
+    | `X of float
+  ]
 
-let string_of_axis_ty = function
-  | Timeseries -> "timeseries"
+  let to_float = function
+    | `Time t -> t *. 1000. (* JS takes milliseconds since epoch *)
+    | `X x -> x
+end
+
+
+module Data = struct
+  type t = {
+    x_axis: Axis.t option;
+    columns: (Tic.t list) * Column.t list;
+  }
+
+  let empty = {
+    x_axis = None;
+    columns = (
+      [],
+      [ { Column.label = "";
+          values = [];
+          ty = Column_type.Line;
+        } ]
+    )
+  }
+end
+
 
 let js_of_columns (tics, columns) =
   let data_columns =
     Js.Unsafe.(
       List.map (fun column ->
-        Js.array (Array.of_list (inject (Js.string column.label) :: (List.map inject column.values)))
+        Js.array (Array.of_list (inject (Js.string column.Column.label) :: (List.map inject column.Column.values)))
       ) columns
     ) in
 
@@ -75,23 +97,23 @@ let js_of_columns (tics, columns) =
       match tics with
       | [] -> data_columns
       | tics ->
-        let tics = Js.array (Array.of_list (inject (Js.string "x") :: (List.map (fun x -> inject (1000.0 *. x)) tics))) in
+        let tics = Js.array (Array.of_list (inject (Js.string "x") :: (List.map (fun x -> inject (Tic.to_float x)) tics))) in
         tics :: data_columns
     )))
   )
 
 let generate bindto data =
-  let columns = js_of_columns data.columns in
+  let columns = js_of_columns data.Data.columns in
 
   let axis =
     Js.Unsafe.(
-      match data.x_axis with
+      match data.Data.x_axis with
       | None -> []
       | Some x -> [ "axis", obj [|
         "x", obj [|
-          "type", inject (Js.string (string_of_axis_ty x.ty));
+          "type", inject (Js.string (Axis_type.to_string x.Axis.ty));
           "tick", obj [|
-            "format", inject (Js.string x.format)
+            "format", inject (Js.string x.Axis.format)
           |]
         |]
       |] ]
@@ -99,14 +121,14 @@ let generate bindto data =
 
     let data =
       Js.Unsafe.(
-        (if data.x_axis = None then [] else [
+        (if data.Data.x_axis = None then [] else [
           "x", inject (Js.string "x");
           "xFormat", inject (Js.string "%s")
         ]) @ [
           "columns", columns;
           "types", obj (Array.of_list (List.map (fun column ->
-            column.label, inject (Js.string (string_of_column_type column.ty))
-          ) (snd data.columns)));
+            column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
+          ) (snd data.Data.columns)));
         ]
       ) in
 
