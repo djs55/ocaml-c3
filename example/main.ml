@@ -36,6 +36,11 @@ let multichart name =
           tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
           values = [0.5; 0.4; 0.3; 0.2; 0.1];
           ty = C3.Column_type.Line;
+        }; {
+          C3.Column.label = "Bar";
+          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
+          values = [0.1; 0.1; 0.1; 0.1; 0.1];
+          ty = C3.Column_type.Bar;
         } ]
   } in
   let _ = C3.generate name spec in
