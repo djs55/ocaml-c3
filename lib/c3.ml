@@ -129,7 +129,7 @@ module Gauge = struct
       ]
 end
 
-module Data = struct
+module Chart = struct
   type t = {
     x_axis: Axis.t option;
     columns: Column.t list;
@@ -173,11 +173,11 @@ let js_of_columns columns =
   )
 
 let generate bindto data =
-  let columns = js_of_columns data.Data.columns in
+  let columns = js_of_columns data.Chart.columns in
 
   let axis =
     Js.Unsafe.(
-      match data.Data.x_axis with
+      match data.Chart.x_axis with
       | None -> []
       | Some x -> [ "axis", obj [|
         "x", obj [|
@@ -191,15 +191,15 @@ let generate bindto data =
 
     let data' =
       Js.Unsafe.(
-        (if data.Data.x_axis = None then [] else [
+        (if data.Chart.x_axis = None then [] else [
           "x", inject (Js.string "x");
           "xFormat", inject (Js.string "%s")
         ]) @ [
           "columns", columns;
           "types", obj (Array.of_list (List.map (fun column ->
             column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
-          ) data.Data.columns));
-          "groups", inject @@ Js.array @@ Array.of_list @@ List.map (fun g -> inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string x) g) data.Data.groups;
+          ) data.Chart.columns));
+          "groups", inject @@ Js.array @@ Array.of_list @@ List.map (fun g -> inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string x) g) data.Chart.groups;
         ]
       ) in
 
@@ -209,11 +209,11 @@ let generate bindto data =
         (axis @ [
           "bindto", inject (Js.string bindto);
           "data", obj (Array.of_list data')
-        ] @ (match data.Data.donut_title with
+        ] @ (match data.Chart.donut_title with
              | None -> []
              | Some x -> [ "donut", obj [| "title", inject (Js.string x) |] ]
-        ) @ (Gauge.to_gauge_obj data.Data.gauge
-        ) @ (Gauge.to_color_obj data.Data.gauge)
+        ) @ (Gauge.to_gauge_obj data.Chart.gauge
+        ) @ (Gauge.to_color_obj data.Chart.gauge)
       ))) in
   Firebug.console##log(arg);
 

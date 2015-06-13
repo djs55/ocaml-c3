@@ -21,8 +21,8 @@ let get_by_id id =
     (fun () -> assert false)
 
 let multichart name =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
+  let spec = { C3.Chart.empty with
+    C3.Chart.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
     };
@@ -54,8 +54,8 @@ let multichart name =
 
 
 let xychart ty name =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
+  let spec = { C3.Chart.empty with
+    C3.Chart.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
     };
@@ -71,8 +71,8 @@ let xychart ty name =
 
 let piechart name donut =
   let ty = C3.Column_type.(if donut then Donut else Pie) in
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = None;
+  let spec = { C3.Chart.empty with
+    C3.Chart.x_axis = None;
     columns =
       [ { C3.Column.label = "a";
           tics = [ ];
@@ -100,8 +100,8 @@ let piechart name donut =
   ()
 
 let gauge name =
-  let spec = { C3.Data.empty with
-    C3.Data.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
+  let spec = { C3.Chart.empty with
+    C3.Chart.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
     gauge = Some { C3.Gauge.default with
       C3.Gauge.thresholds = Some [
       30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044"
@@ -127,8 +127,8 @@ let rec update_graph_forever chart t () =
   update_graph_forever chart (t +. 0.1) ()
 
 let timeseries () =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
+  let spec = { C3.Chart.empty with
+    C3.Chart.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Timeseries;
       format = "%m/%d";
     }
