@@ -63,8 +63,8 @@ let xychart ty name =
   let _ = C3.generate name spec in
   ()
 
-let piechart name =
-  let ty = C3.Column_type.Pie in
+let piechart name donut =
+  let ty = C3.Column_type.(if donut then Donut else Pie) in
   let spec = {
     C3.Data.x_axis = None;
     columns =
@@ -121,7 +121,8 @@ let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
       multichart "#multichart";
-      piechart "#piechart";
+      piechart "#piechart" false;
+      piechart "#donutchart" true;
       xychart C3.Column_type.Line "#xychart";
       xychart C3.Column_type.Area "#xyareachart";
       xychart C3.Column_type.Area_step "#xyareastepchart";

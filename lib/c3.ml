@@ -23,6 +23,7 @@ module Column_type = struct
     | Area_step
     | Bar
     | Pie
+    | Donut
 
   let to_string = function
     | Line -> "line"
@@ -32,6 +33,7 @@ module Column_type = struct
     | Area_step -> "area-step"
     | Bar -> "bar"
     | Pie -> "pie"
+    | Donut -> "donut"
 end
 
 module Tic = struct
