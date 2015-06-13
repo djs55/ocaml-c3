@@ -21,7 +21,7 @@ let get_by_id id =
     (fun () -> assert false)
 
 let multichart name =
-  let spec = { C3.Data.empty with
+  let spec = {
     C3.Data.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
@@ -48,7 +48,7 @@ let multichart name =
 
 
 let xychart ty name =
-  let spec = { C3.Data.empty with
+  let spec = {
     C3.Data.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
