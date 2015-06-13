@@ -129,11 +129,23 @@ module Gauge = struct
       ]
 end
 
+module Donut = struct
+  type t = {
+    title: string;
+  }
+
+  let to_donut_obj x =
+    let open Js.Unsafe in
+    match x with
+    | None -> []
+    | Some { title } -> [ "donut", obj [| "title", inject @@ Js.string title |] ]
+end
+
 module Chart = struct
   type t = {
     x_axis: Axis.t option;
     columns: Column.t list;
-    donut_title: string option;
+    donut: Donut.t option;
     gauge: Gauge.t option;
     groups: string list list;
   }
@@ -146,7 +158,7 @@ module Chart = struct
           values = [];
           ty = Column_type.Line;
         } ];
-    donut_title = None;
+    donut = None;
     gauge = None;
     groups = [];
   }
@@ -209,9 +221,7 @@ let generate bindto data =
         (axis @ [
           "bindto", inject (Js.string bindto);
           "data", obj (Array.of_list data')
-        ] @ (match data.Chart.donut_title with
-             | None -> []
-             | Some x -> [ "donut", obj [| "title", inject (Js.string x) |] ]
+        ] @ (Donut.to_donut_obj data.Chart.donut
         ) @ (Gauge.to_gauge_obj data.Chart.gauge
         ) @ (Gauge.to_color_obj data.Chart.gauge)
       ))) in

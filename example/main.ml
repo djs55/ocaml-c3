@@ -94,7 +94,7 @@ let piechart name donut =
           values = [ 90. ];
           ty;
         } ];
-    donut_title = if donut then Some "hello" else None;
+    donut = if donut then Some { C3.Donut.title = "hello" } else None;
   } in
   let _ = C3.generate name spec in
   ()
