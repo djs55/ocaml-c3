@@ -27,7 +27,12 @@ let multichart name =
       format = "%d";
     };
     columns =
-      [ { C3.Column.label = "Area_step";
+      [ { C3.Column.label = "Area_step 1";
+          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
+          values = [0.1; 0.2; 0.3; 0.2; 0.1];
+          ty = C3.Column_type.Area_step;
+        }; {
+          C3.Column.label = "Area_step 2";
           tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
           values = [0.1; 0.2; 0.3; 0.2; 0.1];
           ty = C3.Column_type.Area_step;
@@ -36,7 +41,13 @@ let multichart name =
           tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
           values = [0.5; 0.4; 0.3; 0.2; 0.1];
           ty = C3.Column_type.Line;
-        } ]
+        }; {
+          C3.Column.label = "Bar";
+          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
+          values = [0.1; 0.1; 0.1; 0.1; 0.1];
+          ty = C3.Column_type.Bar;
+        } ];
+    groups = [ [ "Area_step 1"; "Area_step 2" ] ];
   } in
   let _ = C3.generate name spec in
   ()
@@ -54,6 +65,48 @@ let xychart ty name =
           values = [0.1; 0.2; 0.3; 0.2; 0.1];
           ty;
         } ]
+  } in
+  let _ = C3.generate name spec in
+  ()
+
+let piechart name donut =
+  let ty = C3.Column_type.(if donut then Donut else Pie) in
+  let spec = { C3.Data.empty with
+    C3.Data.x_axis = None;
+    columns =
+      [ { C3.Column.label = "a";
+          tics = [ ];
+          values = [ 30. ];
+          ty;
+        }; {
+          C3.Column.label = "b";
+          tics = [ ];
+          values = [ 120. ];
+          ty;
+        }; {
+          C3.Column.label = "c";
+          tics = [ ];
+          values = [ 15. ];
+          ty;
+        }; {
+          C3.Column.label = "d";
+          tics = [ ];
+          values = [ 90. ];
+          ty;
+        } ];
+    donut_title = if donut then Some "hello" else None;
+  } in
+  let _ = C3.generate name spec in
+  ()
+
+let gauge name =
+  let spec = { C3.Data.empty with
+    C3.Data.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
+    gauge = Some { C3.Gauge.default with
+      C3.Gauge.thresholds = Some [
+      30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044"
+      ]
+    };
   } in
   let _ = C3.generate name spec in
   ()
@@ -87,6 +140,9 @@ let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
       multichart "#multichart";
+      piechart "#piechart" false;
+      piechart "#donutchart" true;
+      gauge "#gauge";
       xychart C3.Column_type.Line "#xychart";
       xychart C3.Column_type.Area "#xyareachart";
       xychart C3.Column_type.Area_step "#xyareastepchart";
