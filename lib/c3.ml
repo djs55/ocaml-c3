@@ -22,8 +22,9 @@ module Column_type = struct
     | Area_spline
     | Area_step
     | Bar
-    | Pie
-    | Donut
+    | Pie (* columns are summed into individual sectors *)
+    | Donut (* same as pie *)
+    | Gauge (* single column *)
 
   let to_string = function
     | Line -> "line"
@@ -34,6 +35,7 @@ module Column_type = struct
     | Bar -> "bar"
     | Pie -> "pie"
     | Donut -> "donut"
+    | Gauge -> "gauge"
 end
 
 module Tic = struct
@@ -73,13 +75,66 @@ module Axis = struct
   }
 end
 
+module Gauge = struct
+  type colour = string
 
+  type t = {
+    min: float option;
+    max: float option;
+    units: string option;
+    width: int option;
+    thresholds: (float * colour) list option;
+  }
+
+  let default = {
+    min = None; max = None; units = None; width = None; thresholds = None;
+  }
+
+  let to_gauge_obj x =
+    let open Js.Unsafe in
+    match x with
+    | None -> []
+    | Some x ->
+      [ "gauge", obj (Array.of_list (
+         ( match x.min with
+           | None -> []
+           | Some x -> [ "min", inject x ]
+         ) @ (
+           match x.max with
+           | None -> []
+           | Some x -> [ "max", inject x ]
+         ) @ (
+           match x.units with
+           | None -> []
+           | Some x -> [ "units", inject (Js.string x) ]
+         ) @ (
+           match x.width with
+           | None -> []
+           | Some x -> [ "width", inject x ]
+         )))
+      ]
+
+  let to_color_obj x =
+    let open Js.Unsafe in
+    match x with
+    | None -> []
+    | Some { thresholds = None } -> []
+    | Some { thresholds = Some ts } ->
+      [ "color", obj [|
+        "pattern", inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string @@ snd x) ts;
+        "threshold", obj [|
+          "values", inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ fst x) ts;
+        |]
+        |]
+      ]
+end
 
 module Data = struct
   type t = {
     x_axis: Axis.t option;
     columns: Column.t list;
     donut_title: string option;
+    gauge: Gauge.t option;
   }
 
   let empty = {
@@ -91,6 +146,7 @@ module Data = struct
           ty = Column_type.Line;
         } ];
     donut_title = None;
+    gauge = None;
   }
 end
 
@@ -152,9 +208,10 @@ let generate bindto data =
           "data", obj (Array.of_list data')
         ] @ (match data.Data.donut_title with
              | None -> []
-             | Some x -> [ "donut", obj [| "title", inject (Js.string x) |] ])
-        )
-      ))  in
+             | Some x -> [ "donut", obj [| "title", inject (Js.string x) |] ]
+        ) @ (Gauge.to_gauge_obj data.Data.gauge
+        ) @ (Gauge.to_color_obj data.Data.gauge)
+      ))) in
   Firebug.console##log(arg);
 
   let c3 = Js.Unsafe.global##c3 in

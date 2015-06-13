@@ -65,7 +65,7 @@ let xychart ty name =
 
 let piechart name donut =
   let ty = C3.Column_type.(if donut then Donut else Pie) in
-  let spec = {
+  let spec = { C3.Data.empty with
     C3.Data.x_axis = None;
     columns =
       [ { C3.Column.label = "a";
@@ -89,6 +89,18 @@ let piechart name donut =
           ty;
         } ];
     donut_title = if donut then Some "hello" else None;
+  } in
+  let _ = C3.generate name spec in
+  ()
+
+let gauge name =
+  let spec = { C3.Data.empty with
+    C3.Data.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
+    gauge = Some { C3.Gauge.default with
+      C3.Gauge.thresholds = Some [
+      30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044"
+      ]
+    };
   } in
   let _ = C3.generate name spec in
   ()
@@ -124,6 +136,7 @@ let _ =
       multichart "#multichart";
       piechart "#piechart" false;
       piechart "#donutchart" true;
+      gauge "#gauge";
       xychart C3.Column_type.Line "#xychart";
       xychart C3.Column_type.Area "#xyareachart";
       xychart C3.Column_type.Area_step "#xyareastepchart";
