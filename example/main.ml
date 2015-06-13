@@ -79,8 +79,8 @@ let piechart name donut =
 let gauge name =
   let spec = { C3.Chart.empty with
     C3.Chart.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
-    gauge = Some { C3.Gauge.default with
-      C3.Gauge.thresholds = Some [
+    gauge = Some { C3.Gauge_info.default with
+      C3.Gauge_info.thresholds = Some [
       30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044"
       ]
     };

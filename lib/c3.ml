@@ -75,7 +75,7 @@ module Axis = struct
   }
 end
 
-module Gauge = struct
+module Gauge_info = struct
   type colour = string
 
   type t = {
@@ -146,7 +146,7 @@ module Chart = struct
     x_axis: Axis.t option;
     columns: Column.t list;
     donut: Donut.t option;
-    gauge: Gauge.t option;
+    gauge: Gauge_info.t option;
     groups: string list list;
   }
 
@@ -247,8 +247,8 @@ let generate bindto data =
           "bindto", inject (Js.string bindto);
           "data", obj (Array.of_list data')
         ] @ (Donut.to_donut_obj data.Chart.donut
-        ) @ (Gauge.to_gauge_obj data.Chart.gauge
-        ) @ (Gauge.to_color_obj data.Chart.gauge)
+        ) @ (Gauge_info.to_gauge_obj data.Chart.gauge
+        ) @ (Gauge_info.to_color_obj data.Chart.gauge)
       ))) in
   Firebug.console##log(arg);
 
