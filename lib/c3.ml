@@ -86,6 +86,9 @@ module Gauge_info = struct
     thresholds: (float * colour) list option;
   }
 
+  let make ?min ?max ?units ?width ?thresholds () =
+    { min; max; units; width; thresholds }
+
   let default = {
     min = None; max = None; units = None; width = None; thresholds = None;
   }
@@ -188,6 +191,25 @@ module Pie = struct
       | None -> None
       | Some title -> Some { Donut.title } in
     { Chart.empty with Chart.columns; donut }
+end
+
+module Gauge = struct
+  type t = {
+    value: float;
+    label: string;
+    info: Gauge_info.t;
+  }
+
+  let make ?min ?max ?units ?width ?thresholds ~value ~label () =
+    let info = Gauge_info.make ?min ?max ?units ?width ?thresholds () in
+    { value; label; info }
+
+  let to_chart t =
+    let columns = [ { Column.label = t.label; tics = []; values = [ t.value ]; ty = Column_type.Gauge} ] in
+    let gauge = Some t.info in
+    { Chart.empty with
+      Chart.columns;
+      gauge }
 end
 
 let js_of_columns columns =
