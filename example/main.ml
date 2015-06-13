@@ -21,7 +21,7 @@ let get_by_id id =
     (fun () -> assert false)
 
 let multichart name =
-  let spec = {
+  let spec = { C3.Data.empty with
     C3.Data.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
@@ -48,7 +48,7 @@ let multichart name =
 
 
 let xychart ty name =
-  let spec = {
+  let spec = { C3.Data.empty with
     C3.Data.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
       format = "%d";
@@ -87,7 +87,8 @@ let piechart name donut =
           tics = [ ];
           values = [ 90. ];
           ty;
-        } ]
+        } ];
+    donut_title = if donut then Some "hello" else None;
   } in
   let _ = C3.generate name spec in
   ()

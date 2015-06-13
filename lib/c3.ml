@@ -79,6 +79,7 @@ module Data = struct
   type t = {
     x_axis: Axis.t option;
     columns: Column.t list;
+    donut_title: string option;
   }
 
   let empty = {
@@ -88,7 +89,8 @@ module Data = struct
           tics = [];
           values = [];
           ty = Column_type.Line;
-        } ]
+        } ];
+    donut_title = None;
   }
 end
 
@@ -129,7 +131,7 @@ let generate bindto data =
       |] ]
     ) in
 
-    let data =
+    let data' =
       Js.Unsafe.(
         (if data.Data.x_axis = None then [] else [
           "x", inject (Js.string "x");
@@ -147,8 +149,11 @@ let generate bindto data =
       (Array.of_list
         (axis @ [
           "bindto", inject (Js.string bindto);
-          "data", obj (Array.of_list data)
-        ])
+          "data", obj (Array.of_list data')
+        ] @ (match data.Data.donut_title with
+             | None -> []
+             | Some x -> [ "donut", obj [| "title", inject (Js.string x) |] ])
+        )
       ))  in
   Firebug.console##log(arg);
 
