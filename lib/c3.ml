@@ -135,6 +135,7 @@ module Data = struct
     columns: Column.t list;
     donut_title: string option;
     gauge: Gauge.t option;
+    groups: string list list;
   }
 
   let empty = {
@@ -147,6 +148,7 @@ module Data = struct
         } ];
     donut_title = None;
     gauge = None;
+    groups = [];
   }
 end
 
@@ -197,6 +199,7 @@ let generate bindto data =
           "types", obj (Array.of_list (List.map (fun column ->
             column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
           ) data.Data.columns));
+          "groups", inject @@ Js.array @@ Array.of_list @@ List.map (fun g -> inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string x) g) data.Data.groups;
         ]
       ) in
 

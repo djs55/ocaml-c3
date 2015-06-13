@@ -27,7 +27,12 @@ let multichart name =
       format = "%d";
     };
     columns =
-      [ { C3.Column.label = "Area_step";
+      [ { C3.Column.label = "Area_step 1";
+          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
+          values = [0.1; 0.2; 0.3; 0.2; 0.1];
+          ty = C3.Column_type.Area_step;
+        }; {
+          C3.Column.label = "Area_step 2";
           tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
           values = [0.1; 0.2; 0.3; 0.2; 0.1];
           ty = C3.Column_type.Area_step;
@@ -41,7 +46,8 @@ let multichart name =
           tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
           values = [0.1; 0.1; 0.1; 0.1; 0.1];
           ty = C3.Column_type.Bar;
-        } ]
+        } ];
+    groups = [ [ "Area_step 1"; "Area_step 2" ] ];
   } in
   let _ = C3.generate name spec in
   ()
