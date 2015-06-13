@@ -164,6 +164,31 @@ module Chart = struct
   }
 end
 
+module Pie = struct
+  type t = {
+    values: (string * float) list;
+    hole: string option;
+  }
+
+  let empty = { values = []; hole = None }
+
+  let add ~label ~value ~t () =
+    { t with values = (label, value) :: t.values }
+
+  let make ~columns ?hole () =
+    let t = { empty with hole } in
+    List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t columns
+
+  let to_chart t =
+    let ty = if t.hole = None then Column_type.Pie else Column_type.Donut in
+    let column (label, value) =
+      { Column.label; tics = []; values = [ value ]; ty } in
+    let columns = List.map column t.values in
+    let donut = match t.hole with
+      | None -> None
+      | Some title -> Some { Donut.title } in
+    { Chart.empty with Chart.columns; donut }
+end
 
 let js_of_columns columns =
   let tics = List.concat (List.map (fun c -> c.Column.tics) columns) in

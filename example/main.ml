@@ -70,33 +70,10 @@ let xychart ty name =
   ()
 
 let piechart name donut =
-  let ty = C3.Column_type.(if donut then Donut else Pie) in
-  let spec = { C3.Chart.empty with
-    C3.Chart.x_axis = None;
-    columns =
-      [ { C3.Column.label = "a";
-          tics = [ ];
-          values = [ 30. ];
-          ty;
-        }; {
-          C3.Column.label = "b";
-          tics = [ ];
-          values = [ 120. ];
-          ty;
-        }; {
-          C3.Column.label = "c";
-          tics = [ ];
-          values = [ 15. ];
-          ty;
-        }; {
-          C3.Column.label = "d";
-          tics = [ ];
-          values = [ 90. ];
-          ty;
-        } ];
-    donut = if donut then Some { C3.Donut.title = "hello" } else None;
-  } in
-  let _ = C3.generate name spec in
+  let pie = C3.Pie.make
+    ?hole:(if donut then Some "hello" else None)
+    ~columns:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] () in
+  let _ = C3.generate name (C3.Pie.to_chart pie) in
   ()
 
 let gauge name =
