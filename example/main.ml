@@ -63,6 +63,35 @@ let xychart ty name =
   let _ = C3.generate name spec in
   ()
 
+let piechart name =
+  let ty = C3.Column_type.Pie in
+  let spec = {
+    C3.Data.x_axis = None;
+    columns =
+      [ { C3.Column.label = "a";
+          tics = [ ];
+          values = [ 30. ];
+          ty;
+        }; {
+          C3.Column.label = "b";
+          tics = [ ];
+          values = [ 120. ];
+          ty;
+        }; {
+          C3.Column.label = "c";
+          tics = [ ];
+          values = [ 15. ];
+          ty;
+        }; {
+          C3.Column.label = "d";
+          tics = [ ];
+          values = [ 90. ];
+          ty;
+        } ]
+  } in
+  let _ = C3.generate name spec in
+  ()
+
 let rec update_graph_forever chart t () =
   if t > 10. then return ()
   else
@@ -92,6 +121,7 @@ let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
       multichart "#multichart";
+      piechart "#piechart";
       xychart C3.Column_type.Line "#xychart";
       xychart C3.Column_type.Area "#xyareachart";
       xychart C3.Column_type.Area_step "#xyareastepchart";

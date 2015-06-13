@@ -22,6 +22,7 @@ module Column_type = struct
     | Area_spline
     | Area_step
     | Bar
+    | Pie
 
   let to_string = function
     | Line -> "line"
@@ -30,6 +31,7 @@ module Column_type = struct
     | Area_spline -> "area-spline"
     | Area_step -> "area-step"
     | Bar -> "bar"
+    | Pie -> "pie"
 end
 
 module Tic = struct
