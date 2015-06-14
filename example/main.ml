@@ -69,23 +69,75 @@ let gauge name =
     |> C3.Gauge.render ~bindto:name in
   ()
 
-let rec update_graph_forever chart t () =
-  if t > 10. then return ()
-  else begin
-    C3.Line.update ~segments:[ C3.Segment.make ~label:"sin(t)" ~points:[t, sin t]
-                               ~kind:`Area_step () ]
-                   ~flow_to:(`Delete 0)
-                   chart;
-    Lwt_js.sleep 0.1
-    >>= fun () ->
-    update_graph_forever chart (t +. 0.1) ()
-  end
+
+
+module Histogram = struct
+  type t = {
+    bins: int array;
+    start: float;
+    width: float;
+  }
+  let make ~start ~width ~n () =
+    let bins = Array.make n 0 in
+    { start; width; bins }
+  let add ~value t =
+    try
+      (* Discard values which are out of range *)
+      let bin = int_of_float ((value -. t.start) /. t.width) in
+      t.bins.(bin) <- t.bins.(bin) + 1
+    with _ -> ()
+  let to_segment t =
+    let points =
+      t.bins
+      |> Array.to_list
+      |> List.mapi (fun idx v -> let t = float_of_int idx *. t.width +. t.start in t,float_of_int v) in
+
+    C3.Segment.make ~label:"histogram" ~points ~kind:`Bar ()
+end
+
+let pi = 4.0 *. atan(1.0)
+
+let normal () =
+  let h = Histogram.make ~start:(-1.) ~width:0.01 ~n:200 () in
+  let chart =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add ~segment:(Histogram.to_segment h)
+    |> C3.Line.render ~bindto:"#normal" in
+  let sd = 0.1 in
+  Lwt.async
+    (fun () ->
+      let rec loop iterations =
+        for i = 0 to 250 do
+          let u_1 = Random.float 1. in
+          let u_2 = Random.float 1. in
+          (* Box-Muller transform *)
+          let z_0 = sqrt (-2.0 *. log(u_1)) *. cos(2. *. pi *. u_2) *. sd in
+          let z_1 = sqrt (-2.0 *. log(u_1)) *. sin(2. *. pi *. u_2) *. sd in
+          Histogram.add ~value:z_0 h;
+          Histogram.add ~value:z_1 h;
+        done;
+        C3.Line.update ~segments:[ Histogram.to_segment h ] chart;
+        Lwt_js.sleep 1.
+        >>= fun () ->
+        loop (iterations + 1) in
+      loop 0
+    )
 
 let timeseries () =
   let chart =
     C3.Line.make ~kind:`Timeseries ~x_format:"%m/%d" ()
     |> C3.Line.render ~bindto:"#timeserieschart" in
-
+  let rec update_graph_forever chart t () =
+    if t > 10. then return ()
+    else begin
+      C3.Line.flow ~segments:[ C3.Segment.make ~label:"sin(t)" ~points:[t, sin t]
+                                 ~kind:`Area_step () ]
+                     ~flow_to:(`Delete 0)
+                     chart;
+      Lwt_js.sleep 0.1
+      >>= fun () ->
+      update_graph_forever chart (t +. 0.1) ()
+    end in
   Lwt.async (update_graph_forever chart 0.)
 
 let _ =
@@ -99,6 +151,7 @@ let _ =
       xychart `Area "#xyareachart";
       xychart `Area_step "#xyareastepchart";
       xychart `Spline "#xysplinechart";
+      normal ();
       timeseries ();
       Js._true
     )

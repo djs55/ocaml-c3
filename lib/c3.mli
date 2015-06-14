@@ -116,7 +116,11 @@ module Line : sig
   val render: bindto:string -> t -> display
   (** A rendered line chart *)
 
-  val update: segments:Segment.t list -> ?flow_to:flow_to -> display -> unit
-  (** Dynamically update a rendered line chart by adding a list of segments.
+  val flow: segments:Segment.t list -> ?flow_to:flow_to -> display -> unit
+  (** Dynamically extend a rendered line chart by adding a list of segments.
       The ?flow_to parameter customises how the chart will be added. *)
+
+  val update: segments:Segment.t list -> display -> unit
+  (** Replace the segments in an existing rendered chart with new ones.
+      The old segments with the same label will be removed and replaced. *)
 end
