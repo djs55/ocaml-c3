@@ -38,7 +38,7 @@ let multichart name =
        ~segment:(C3.Segment.make ~kind:`Bar
                  ~points:[ 0.1,0.1; 0.2,0.1; 0.3,0.1; 0.4,0.1; 0.5,0.1]
                  ~label:"Bar" ())
-    |> C3.Line.render name in
+    |> C3.Line.render ~bindto:name in
   ()
 
 
@@ -48,7 +48,7 @@ let xychart kind name =
     |> C3.Line.add
        ~segment:(C3.Segment.make ~kind ~points:[0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
                  ~label:(C3.Segment.string_of_kind kind) ())
-    |> C3.Line.render name in
+    |> C3.Line.render ~bindto:name in
   ()
 
 let piechart name donut =
@@ -84,7 +84,7 @@ let rec update_graph_forever chart t () =
 let timeseries () =
   let chart =
     C3.Line.make ~kind:`Timeseries ~x_format:"%m/%d" ()
-    |> C3.Line.render "#timeserieschart" in
+    |> C3.Line.render ~bindto:"#timeserieschart" in
 
   Lwt.async (update_graph_forever chart 0.)
 

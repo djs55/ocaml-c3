@@ -84,25 +84,39 @@ end
 
 
 type flow_to = [
-  | `OneInOneOut
-  | `ToX of string
-  | `Delete of int
+  | `OneInOneOut    (** For every point added, remove the leftmost *)
+  | `ToX of string  (** Move the minimum x co-ordinate to the given value *)
+  | `Delete of int  (** Delete exactly n points from the leftmost edge *)
 ]
 
 module Line : sig
+  (** A line chart *)
+
   type kind = [ `Timeseries | `XY ]
+  (** A line chart can show either timeseries data or arbitrary values on the
+      X axis. *)
 
   type t
+  (** An unrendered line chart *)
 
   val make: ?x_format:string -> kind:kind -> unit -> t
+  (** Create an unrendered line chart, showing either `Timeseries or `XY data.
+      The ?x_format is a format string for the labels on the x axis. *)
 
   val add: segment:Segment.t -> t -> t
+  (** Add a line segment to an unrendered line chart. *)
 
   val add_group: segments:Segment.t list -> t -> t
+  (** Add a group of line segments to an unrendered line chart. By grouping line
+      segments they will be rendered stacked. *)
 
   type display
+  (** A rendered line chart *)
 
-  val render: string -> t -> display
+  val render: bindto:string -> t -> display
+  (** A rendered line chart *)
 
   val update: segments:Segment.t list -> ?flow_to:flow_to -> display -> unit
+  (** Dynamically update a rendered line chart by adding a list of segments.
+      The ?flow_to parameter customises how the chart will be added. *)
 end

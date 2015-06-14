@@ -385,7 +385,7 @@ module Line = struct
 
   type display = kind * unit
 
-  let render bindto t =
+  let render ~bindto t =
     let chart = generate bindto (to_chart t) in
     t.kind, chart
 
