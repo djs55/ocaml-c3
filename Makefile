@@ -29,6 +29,16 @@ setup.bin: setup.ml
 	ocamlopt.opt -o $@ $< || ocamlopt -o $@ $< || ocamlc -o $@ $<
 	$(RM) setup.cmx setup.cmi setup.o setup.cmo
 
+install:
+	./setup.bin -install
+
+uninstall:
+	./setup.bin -uninstall
+
+reinstall:
+	./setup.bin -uninstall
+	./setup.bin -install
+
 .PHONY: run
 run:
 	(cd example; cohttp-server-lwt)
