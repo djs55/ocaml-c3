@@ -35,19 +35,29 @@ module Pie : sig
 end
 
 module Gauge : sig
+  (** A Gauge shows a single value within a defined minimum and maximum range *)
 
   type t
+  (** An unrendered gauge *)
 
   type colour = string
+  (** A colour, e.g. "#ffffff" *)
 
   val make: ?min:float -> ?max:float -> ?units:string
     -> ?width:int -> ?thresholds:(float * colour) list
     -> value:float -> label:string
     -> unit -> t
+  (** Create a gauge with a given value and label. By default a gauge will
+      be a percentage i.e. with min = 0, max = 100, units = " %". The
+      thresholds allow customisation of the colour, e.g. green, amber, red
+      if that helps interpret the meaning of the value. *)
 
   type display
+  (** A rendered gauge *)
 
-  val render: string -> t -> display
+  val render: bindto:string -> t -> display
+  (** Render a gauge chart in a named <div> *)
+  
 end
 
 module Segment : sig

@@ -66,7 +66,7 @@ let gauge name =
       ~label:"hello"
       ~value:60.
       ()
-    |> C3.Gauge.render name in
+    |> C3.Gauge.render ~bindto:name in
   ()
 
 let rec update_graph_forever chart t () =

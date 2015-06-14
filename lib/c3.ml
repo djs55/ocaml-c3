@@ -352,7 +352,7 @@ module Gauge = struct
 
   type display = unit
 
-  let render bindto t = generate bindto (to_chart t)
+  let render ~bindto t = generate bindto (to_chart t)
 end
 
 
