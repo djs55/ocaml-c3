@@ -33,7 +33,7 @@ setup.bin: setup.ml
 run:
 	(cd example; cohttp-server-lwt)
 
-VERSION = $(shell grep 'Version:' _oasis | sed 's/Version: *//')
+VERSION = $(shell grep '^Version:' _oasis | sed 's/Version: *//')
 NAME    = $(shell grep 'Name:' _oasis    | sed 's/Name: *//')
 ARCHIVE = https://github.com/djs55/ocaml-c3/archive/v$(VERSION).tar.gz
 
