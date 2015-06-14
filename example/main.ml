@@ -24,30 +24,30 @@ let multichart name =
   let _ =
     C3.Line.make ~kind:`XY ()
     |> C3.Line.add_group
-       ~segments: [ C3.Segment.make ~ty:`Area_step
+       ~segments: [ C3.Segment.make ~kind:`Area_step
                     ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
                     ~label:"Area_step 1" ();
-                    C3.Segment.make ~ty:`Area_step
+                    C3.Segment.make ~kind:`Area_step
                     ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
                     ~label:"Area_step 2" (); ]
     |> C3.Line.add
-       ~segment:(C3.Segment.make ~ty:`Line
+       ~segment:(C3.Segment.make ~kind:`Line
                  ~points:[ 0.1,0.5; 0.2,0.4; 0.3,0.3; 0.4,0.2; 0.5,0.1]
                  ~label:"Line" ())
     |> C3.Line.add
-       ~segment:(C3.Segment.make ~ty:`Bar
+       ~segment:(C3.Segment.make ~kind:`Bar
                  ~points:[ 0.1,0.1; 0.2,0.1; 0.3,0.1; 0.4,0.1; 0.5,0.1]
                  ~label:"Bar" ())
     |> C3.Line.render name in
   ()
 
 
-let xychart ty name =
+let xychart kind name =
   let _ =
     C3.Line.make ~kind:`XY ()
     |> C3.Line.add
-       ~segment:(C3.Segment.make ~ty ~points:[0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
-                 ~label:(C3.Column_type.to_string ty) ())
+       ~segment:(C3.Segment.make ~kind ~points:[0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                 ~label:(C3.Segment.string_of_kind kind) ())
     |> C3.Line.render name in
   ()
 
@@ -73,7 +73,7 @@ let rec update_graph_forever chart t () =
   if t > 10. then return ()
   else begin
     C3.Line.update ~segments:[ C3.Segment.make ~label:"sin(t)" ~points:[t, sin t]
-                               ~ty:`Area_step () ]
+                               ~kind:`Area_step () ]
                    ~flow_to:(`Delete 0)
                    chart;
     Lwt_js.sleep 0.1

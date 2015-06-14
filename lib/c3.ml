@@ -171,21 +171,46 @@ end
 
 
 module Segment = struct
+
+type kind = [
+| `Line
+| `Spline
+| `Area
+| `Area_spline
+| `Area_step
+| `Bar
+]
+
+  let string_of_kind = function
+  | `Line -> "Line"
+  | `Spline -> "Spline"
+  | `Area -> "Area"
+  | `Area_spline -> "Area spline"
+  | `Area_step -> "Area step"
+  | `Bar -> "Bar"
+  
   type t = {
     points: (float * float) list;
     label: string;
-    ty: Column_type.t;
+    kind: kind;
   }
 
-  let make ~points ~label ?(ty = `Line) () =
-    { points; label; ty }
+  let make ~points ~label ?(kind = `Line) () =
+    { points; label; kind }
 
   let to_column kind t =
     let tics = match kind with
       | `XY -> List.map (fun x -> `X (fst x)) t.points
       | `Timeseries -> List.map (fun x -> `Time (fst x)) t.points in
     let values = List.map snd t.points in
-    { Column.label = t.label; tics; values; ty = t.ty }
+    let ty = match t.kind with
+    | `Line -> `Line
+    | `Spline -> `Spline
+    | `Area -> `Area
+    | `Area_spline -> `Area_spline
+    | `Area_step -> `Area_step
+    | `Bar -> `Bar in
+    { Column.label = t.label; tics; values; ty }
 end
 
 

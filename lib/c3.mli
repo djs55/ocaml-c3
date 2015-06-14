@@ -14,22 +14,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 *)
 
-module Column_type : sig
-  type t = [
-    | `Line
-    | `Spline
-    | `Area
-    | `Area_spline
-    | `Area_step
-    | `Bar
-    | `Pie (* columns are summed into individual sectors *)
-    | `Donut (* same as pie *)
-    | `Gauge (* single column *)
-  ]
-
-  val to_string: t -> string
-end
-
 module Pie : sig
   type t
 
@@ -61,15 +45,24 @@ module Gauge : sig
 end
 
 module Segment : sig
+  type kind = [
+  | `Line
+  | `Spline
+  | `Area
+  | `Area_spline
+  | `Area_step
+  | `Bar
+  ]
+  val string_of_kind: kind -> string
 
   type t = {
     points: (float * float) list;
     label: string;
-    ty: Column_type.t;
+    kind: kind;
   }
 
   val make: points:(float * float) list -> label:string
-    -> ?ty:Column_type.t -> unit -> t
+    -> ?kind:kind -> unit -> t
 end
 
 
