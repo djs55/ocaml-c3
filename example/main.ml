@@ -21,39 +21,36 @@ let get_by_id id =
     (fun () -> assert false)
 
 let multichart name =
-  let spec = { C3.Chart.empty with
-    C3.Chart.x_axis = Some {
-      C3.Axis.ty = C3.Axis_type.Line;
-      format = "%d";
-    };
-    columns =
-      [ { C3.Column.label = "Area_step 1";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.2; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Area_step;
-        }; {
-          C3.Column.label = "Area_step 2";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.2; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Area_step;
-        }; {
-          C3.Column.label = "Line";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.5; 0.4; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Line;
-        }; {
-          C3.Column.label = "Bar";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.1; 0.1; 0.1; 0.1];
-          ty = C3.Column_type.Bar;
-        } ];
-    groups = [ [ "Area_step 1"; "Area_step 2" ] ];
-  } in
-  let _ = C3.generate name spec in
+  let chart =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add_group
+       ~segments: [ C3.Segment.make ~ty:C3.Column_type.Area_step
+                    ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                    ~label:"Area_step 1" ();
+                    C3.Segment.make ~ty:C3.Column_type.Area_step
+                    ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                    ~label:"Area_step 2" (); ]
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~ty:C3.Column_type.Line
+                 ~points:[ 0.1,0.5; 0.2,0.4; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                 ~label:"Line" ())
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~ty:C3.Column_type.Bar
+                 ~points:[ 0.1,0.1; 0.2,0.1; 0.3,0.1; 0.4,0.1; 0.5,0.1]
+                 ~label:"Bar" ())
+    |> C3.Line.to_chart in
+  let _ = C3.generate name chart in
   ()
 
 
 let xychart ty name =
+  let chart =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~ty ~points:[0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                 ~label:(C3.Column_type.to_string ty) ())
+    |> C3.Line.to_chart in
+    (*
   let spec = { C3.Chart.empty with
     C3.Chart.x_axis = Some {
       C3.Axis.ty = C3.Axis_type.Line;
@@ -66,7 +63,8 @@ let xychart ty name =
           ty;
         } ]
   } in
-  let _ = C3.generate name spec in
+  *)
+  let _ = C3.generate name chart in
   ()
 
 let piechart name donut =
