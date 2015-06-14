@@ -57,28 +57,29 @@ module Gauge : sig
 
   val render: bindto:string -> t -> display
   (** Render a gauge chart in a named <div> *)
-  
+
 end
 
 module Segment : sig
+  (** A line segment within a Line chart *)
+
   type kind = [
-  | `Line
-  | `Spline
-  | `Area
-  | `Area_spline
-  | `Area_step
-  | `Bar
+    | `Line         (** Render with straight lines *)
+    | `Spline       (** Render with splines to make it appear smooth *)
+    | `Area         (** Render with straight lines with a translucent fill underneath *)
+    | `Area_spline  (** Render with splines to make it appear smooth with a translucent fill underneath *)
+    | `Area_step    (** Render as horizontal steps with a translucent fill underneath *)
+    | `Bar          (** Render as discrete vertical bars *)
   ]
   val string_of_kind: kind -> string
 
-  type t = {
-    points: (float * float) list;
-    label: string;
-    kind: kind;
-  }
+  type t
+  (** An unrendered line segment within a Line chart *)
 
   val make: points:(float * float) list -> label:string
     -> ?kind:kind -> unit -> t
+  (** Create an unrendered line segment from a set of points and a label.
+      By default it will render with straight lines. *)
 end
 
 
