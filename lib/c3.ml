@@ -169,50 +169,6 @@ module Chart = struct
   }
 end
 
-module Pie = struct
-  type t = {
-    values: (string * float) list;
-    hole: string option;
-  }
-
-  let empty = { values = []; hole = None }
-
-  let add ~label ~value ~t () =
-    { t with values = (label, value) :: t.values }
-
-  let make ~columns ?hole () =
-    let t = { empty with hole } in
-    List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t columns
-
-  let to_chart t =
-    let ty = if t.hole = None then `Pie else `Donut in
-    let column (label, value) =
-      { Column.label; tics = []; values = [ value ]; ty } in
-    let columns = List.map column t.values in
-    let donut = match t.hole with
-      | None -> None
-      | Some title -> Some { Donut.title } in
-    { Chart.empty with Chart.columns; donut }
-end
-
-module Gauge = struct
-  type t = {
-    value: float;
-    label: string;
-    info: Gauge_info.t;
-  }
-
-  let make ?min ?max ?units ?width ?thresholds ~value ~label () =
-    let info = Gauge_info.make ?min ?max ?units ?width ?thresholds () in
-    { value; label; info }
-
-  let to_chart t =
-    let columns = [ { Column.label = t.label; tics = []; values = [ t.value ]; ty = `Gauge} ] in
-    let gauge = Some t.info in
-    { Chart.empty with
-      Chart.columns;
-      gauge }
-end
 
 module Segment = struct
   type t = {
@@ -318,6 +274,62 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
     ) in
   Js.Unsafe.meth_call chart "flow" [| arg |]
 
+module Pie = struct
+  type t = {
+    values: (string * float) list;
+    hole: string option;
+  }
+
+  let empty = { values = []; hole = None }
+
+  let add ~label ~value ~t () =
+    { t with values = (label, value) :: t.values }
+
+  let make ~columns ?hole () =
+    let t = { empty with hole } in
+    List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t columns
+
+  let to_chart t =
+    let ty = if t.hole = None then `Pie else `Donut in
+    let column (label, value) =
+      { Column.label; tics = []; values = [ value ]; ty } in
+    let columns = List.map column t.values in
+    let donut = match t.hole with
+      | None -> None
+      | Some title -> Some { Donut.title } in
+    { Chart.empty with Chart.columns; donut }
+
+  type display = unit
+
+  let render bindto t = generate bindto (to_chart t)
+end
+
+module Gauge = struct
+  type t = {
+    value: float;
+    label: string;
+    info: Gauge_info.t;
+  }
+
+  type colour = string
+
+  let make ?min ?max ?units ?width ?thresholds ~value ~label () =
+    let info = Gauge_info.make ?min ?max ?units ?width ?thresholds () in
+    { value; label; info }
+
+  let to_chart t =
+    let columns = [ { Column.label = t.label; tics = []; values = [ t.value ]; ty = `Gauge} ] in
+    let gauge = Some t.info in
+    { Chart.empty with
+      Chart.columns;
+      gauge }
+
+
+  type display = unit
+
+  let render bindto t = generate bindto (to_chart t)
+end
+
 
 module Line = struct
   type kind = [ `Timeseries | `XY ]
@@ -345,6 +357,8 @@ module Line = struct
       Axis.ty; format = t.x_format;
     } in
     { Chart.empty with Chart.x_axis; columns; groups }
+
+  type display = kind * unit
 
   let render bindto t =
     let chart = generate bindto (to_chart t) in

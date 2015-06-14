@@ -52,19 +52,21 @@ let xychart ty name =
   ()
 
 let piechart name donut =
-  let pie = C3.Pie.make
-    ?hole:(if donut then Some "hello" else None)
-    ~columns:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] () in
-  let _ = C3.generate name (C3.Pie.to_chart pie) in
+  let _ =
+    C3.Pie.make
+      ?hole:(if donut then Some "hello" else None)
+      ~columns:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] ()
+    |> C3.Pie.render name in
   ()
 
 let gauge name =
-  let gauge = C3.Gauge.make
-    ~thresholds:[ 30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044" ]
-    ~label:"hello"
-    ~value:60.
-    () in
-  let _ = C3.generate name (C3.Gauge.to_chart gauge) in
+  let _ =
+    C3.Gauge.make
+      ~thresholds:[ 30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044" ]
+      ~label:"hello"
+      ~value:60.
+      ()
+    |> C3.Gauge.render name in
   ()
 
 let rec update_graph_forever chart t () =
