@@ -230,33 +230,6 @@ module Segment = struct
     { Column.label = t.label; tics; values; ty = t.ty }
 end
 
-module Line = struct
-  type kind = [ `Timeseries | `XY ]
-
-  type t = {
-    kind: kind;
-    x_format: string;
-    groups: Segment.t list list;
-  }
-
-  let make ?(x_format = "%d") ~kind () =
-    { kind; x_format; groups = [] }
-
-  let add ~segment t =
-    { t with groups = [ segment ] :: t.groups }
-
-  let add_group ~segments t =
-    { t with groups = segments :: t.groups }
-
-  let to_chart t =
-    let columns = List.map (Segment.to_column t.kind) (List.concat t.groups) in
-    let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
-    let ty = match t.kind with `XY -> Axis_type.Line | `Timeseries -> Axis_type.Timeseries in
-    let x_axis = Some {
-      Axis.ty; format = t.x_format;
-    } in
-    { Chart.empty with Chart.x_axis; columns; groups }
-end
 
 let js_of_columns columns =
   let tics = List.concat (List.map (fun c -> c.Column.tics) columns) in
@@ -342,3 +315,40 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
       )
     ) in
   Js.Unsafe.meth_call chart "flow" [| arg |]
+
+
+module Line = struct
+  type kind = [ `Timeseries | `XY ]
+
+  type t = {
+    kind: kind;
+    x_format: string;
+    groups: Segment.t list list;
+  }
+
+  let make ?(x_format = "%d") ~kind () =
+    { kind; x_format; groups = [] }
+
+  let add ~segment t =
+    { t with groups = [ segment ] :: t.groups }
+
+  let add_group ~segments t =
+    { t with groups = segments :: t.groups }
+
+  let to_chart t =
+    let columns = List.map (Segment.to_column t.kind) (List.concat t.groups) in
+    let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
+    let ty = match t.kind with `XY -> Axis_type.Line | `Timeseries -> Axis_type.Timeseries in
+    let x_axis = Some {
+      Axis.ty; format = t.x_format;
+    } in
+    { Chart.empty with Chart.x_axis; columns; groups }
+
+  let render bindto t =
+    let chart = generate bindto (to_chart t) in
+    t.kind, chart
+
+  let update ~segments ?flow_to (kind, chart) =
+    let columns = List.map (Segment.to_column kind) segments in
+    flow chart ?flow_to columns
+end
