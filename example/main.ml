@@ -21,119 +21,71 @@ let get_by_id id =
     (fun () -> assert false)
 
 let multichart name =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
-      C3.Axis.ty = C3.Axis_type.Line;
-      format = "%d";
-    };
-    columns =
-      [ { C3.Column.label = "Area_step 1";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.2; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Area_step;
-        }; {
-          C3.Column.label = "Area_step 2";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.2; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Area_step;
-        }; {
-          C3.Column.label = "Line";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.5; 0.4; 0.3; 0.2; 0.1];
-          ty = C3.Column_type.Line;
-        }; {
-          C3.Column.label = "Bar";
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.1; 0.1; 0.1; 0.1];
-          ty = C3.Column_type.Bar;
-        } ];
-    groups = [ [ "Area_step 1"; "Area_step 2" ] ];
-  } in
-  let _ = C3.generate name spec in
+  let _ =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add_group
+       ~segments: [ C3.Segment.make ~kind:`Area_step
+                    ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                    ~label:"Area_step 1" ();
+                    C3.Segment.make ~kind:`Area_step
+                    ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                    ~label:"Area_step 2" (); ]
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~kind:`Line
+                 ~points:[ 0.1,0.5; 0.2,0.4; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                 ~label:"Line" ())
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~kind:`Bar
+                 ~points:[ 0.1,0.1; 0.2,0.1; 0.3,0.1; 0.4,0.1; 0.5,0.1]
+                 ~label:"Bar" ())
+    |> C3.Line.render ~bindto:name in
   ()
 
 
-let xychart ty name =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
-      C3.Axis.ty = C3.Axis_type.Line;
-      format = "%d";
-    };
-    columns =
-      [ { C3.Column.label = C3.Column_type.to_string ty;
-          tics = [ `X 0.1; `X 0.2; `X 0.3; `X 0.4; `X 0.5 ];
-          values = [0.1; 0.2; 0.3; 0.2; 0.1];
-          ty;
-        } ]
-  } in
-  let _ = C3.generate name spec in
+let xychart kind name =
+  let _ =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add
+       ~segment:(C3.Segment.make ~kind ~points:[0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]
+                 ~label:(C3.Segment.string_of_kind kind) ())
+    |> C3.Line.render ~bindto:name in
   ()
 
 let piechart name donut =
-  let ty = C3.Column_type.(if donut then Donut else Pie) in
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = None;
-    columns =
-      [ { C3.Column.label = "a";
-          tics = [ ];
-          values = [ 30. ];
-          ty;
-        }; {
-          C3.Column.label = "b";
-          tics = [ ];
-          values = [ 120. ];
-          ty;
-        }; {
-          C3.Column.label = "c";
-          tics = [ ];
-          values = [ 15. ];
-          ty;
-        }; {
-          C3.Column.label = "d";
-          tics = [ ];
-          values = [ 90. ];
-          ty;
-        } ];
-    donut_title = if donut then Some "hello" else None;
-  } in
-  let _ = C3.generate name spec in
+  let _ =
+    C3.Pie.make
+      ?hole:(if donut then Some "hello" else None)
+      ~sectors:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] ()
+    |> C3.Pie.render ~bindto:name in
   ()
 
 let gauge name =
-  let spec = { C3.Data.empty with
-    C3.Data.columns = [ { C3.Column.label = "hello"; tics = []; values = [ 50. ]; ty = C3.Column_type.Gauge} ];
-    gauge = Some { C3.Gauge.default with
-      C3.Gauge.thresholds = Some [
-      30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044"
-      ]
-    };
-  } in
-  let _ = C3.generate name spec in
+  let _ =
+    C3.Gauge.make
+      ~thresholds:[ 30., "#FF0000"; 60., "#F97600"; 90., "#F6C600"; 100., "#60B044" ]
+      ~label:"hello"
+      ~value:60.
+      ()
+    |> C3.Gauge.render ~bindto:name in
   ()
 
 let rec update_graph_forever chart t () =
   if t > 10. then return ()
-  else
-  let data =
-      [ {
-          C3.Column.label = "sin(t)";
-          tics = [ `Time t ];
-          values = [ sin t ];
-          ty = C3.Column_type.Area_step
-        } ] in
-  C3.flow chart ~flow_to:(`Delete 0) data;
-  Lwt_js.sleep 0.1
-  >>= fun () ->
-  update_graph_forever chart (t +. 0.1) ()
+  else begin
+    C3.Line.update ~segments:[ C3.Segment.make ~label:"sin(t)" ~points:[t, sin t]
+                               ~kind:`Area_step () ]
+                   ~flow_to:(`Delete 0)
+                   chart;
+    Lwt_js.sleep 0.1
+    >>= fun () ->
+    update_graph_forever chart (t +. 0.1) ()
+  end
 
 let timeseries () =
-  let spec = { C3.Data.empty with
-    C3.Data.x_axis = Some {
-      C3.Axis.ty = C3.Axis_type.Timeseries;
-      format = "%m/%d";
-    }
-  } in
-  let chart = C3.generate "#timeserieschart" spec in
+  let chart =
+    C3.Line.make ~kind:`Timeseries ~x_format:"%m/%d" ()
+    |> C3.Line.render ~bindto:"#timeserieschart" in
+
   Lwt.async (update_graph_forever chart 0.)
 
 let _ =
@@ -143,10 +95,10 @@ let _ =
       piechart "#piechart" false;
       piechart "#donutchart" true;
       gauge "#gauge";
-      xychart C3.Column_type.Line "#xychart";
-      xychart C3.Column_type.Area "#xyareachart";
-      xychart C3.Column_type.Area_step "#xyareastepchart";
-      xychart C3.Column_type.Spline "#xysplinechart";
+      xychart `Line "#xychart";
+      xychart `Area "#xyareachart";
+      xychart `Area_step "#xyareastepchart";
+      xychart `Spline "#xysplinechart";
       timeseries ();
       Js._true
     )
