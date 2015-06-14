@@ -299,6 +299,13 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
     ) in
   Js.Unsafe.meth_call chart "flow" [| arg |]
 
+let load chart cols : unit =
+  let arg =
+    Js.Unsafe.(obj
+        [| "columns", js_of_columns cols |]
+    ) in
+  Js.Unsafe.meth_call chart "load" [| arg |]
+
 module Pie = struct
   type t = {
     values: (string * float) list;
@@ -389,7 +396,11 @@ module Line = struct
     let chart = generate bindto (to_chart t) in
     t.kind, chart
 
-  let update ~segments ?flow_to (kind, chart) =
+  let flow ~segments ?flow_to (kind, chart) =
     let columns = List.map (Segment.to_column kind) segments in
     flow chart ?flow_to columns
+
+  let update ~segments (kind, chart) =
+    let columns = List.map (Segment.to_column kind) segments in
+    load chart columns
 end
