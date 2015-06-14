@@ -5,6 +5,7 @@ build: [
   [make "install"]
 ]
 remove: [
+  ["ocamlfind" "remove" "c3"]
 ]
 depends: [
   "oasis"
