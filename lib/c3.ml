@@ -15,27 +15,28 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 *)
 
 module Column_type = struct
-  type t =
-    | Line
-    | Spline
-    | Area
-    | Area_spline
-    | Area_step
-    | Bar
-    | Pie (* columns are summed into individual sectors *)
-    | Donut (* same as pie *)
-    | Gauge (* single column *)
+  type t = [
+    | `Line
+    | `Spline
+    | `Area
+    | `Area_spline
+    | `Area_step
+    | `Bar
+    | `Pie (* columns are summed into individual sectors *)
+    | `Donut (* same as pie *)
+    | `Gauge (* single column *)
+  ]
 
   let to_string = function
-    | Line -> "line"
-    | Spline -> "spline"
-    | Area -> "area"
-    | Area_spline -> "area-spline"
-    | Area_step -> "area-step"
-    | Bar -> "bar"
-    | Pie -> "pie"
-    | Donut -> "donut"
-    | Gauge -> "gauge"
+    | `Line -> "line"
+    | `Spline -> "spline"
+    | `Area -> "area"
+    | `Area_spline -> "area-spline"
+    | `Area_step -> "area-step"
+    | `Bar -> "bar"
+    | `Pie -> "pie"
+    | `Donut -> "donut"
+    | `Gauge -> "gauge"
 end
 
 module Tic = struct
@@ -59,13 +60,14 @@ module Column = struct
 end
 
 module Axis_type = struct
-  type t =
-    | Timeseries
-    | Line
+  type t = [
+    | `Timeseries
+    | `Line
+  ]
 
   let to_string = function
-    | Timeseries -> "timeseries"
-    | Line -> "line"
+    | `Timeseries -> "timeseries"
+    | `Line -> "line"
 end
 
 module Axis = struct
@@ -159,7 +161,7 @@ module Chart = struct
       [ { Column.label = "";
           tics = [];
           values = [];
-          ty = Column_type.Line;
+          ty = `Line;
         } ];
     donut = None;
     gauge = None;
@@ -183,7 +185,7 @@ module Pie = struct
     List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t columns
 
   let to_chart t =
-    let ty = if t.hole = None then Column_type.Pie else Column_type.Donut in
+    let ty = if t.hole = None then `Pie else `Donut in
     let column (label, value) =
       { Column.label; tics = []; values = [ value ]; ty } in
     let columns = List.map column t.values in
@@ -205,7 +207,7 @@ module Gauge = struct
     { value; label; info }
 
   let to_chart t =
-    let columns = [ { Column.label = t.label; tics = []; values = [ t.value ]; ty = Column_type.Gauge} ] in
+    let columns = [ { Column.label = t.label; tics = []; values = [ t.value ]; ty = `Gauge} ] in
     let gauge = Some t.info in
     { Chart.empty with
       Chart.columns;
@@ -219,7 +221,7 @@ module Segment = struct
     ty: Column_type.t;
   }
 
-  let make ~points ~label ?(ty = Column_type.Line) () =
+  let make ~points ~label ?(ty = `Line) () =
     { points; label; ty }
 
   let to_column kind t =
@@ -338,7 +340,7 @@ module Line = struct
   let to_chart t =
     let columns = List.map (Segment.to_column t.kind) (List.concat t.groups) in
     let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
-    let ty = match t.kind with `XY -> Axis_type.Line | `Timeseries -> Axis_type.Timeseries in
+    let ty = match t.kind with `XY -> `Line | `Timeseries -> `Timeseries in
     let x_axis = Some {
       Axis.ty; format = t.x_format;
     } in
