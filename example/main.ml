@@ -55,8 +55,8 @@ let piechart name donut =
   let _ =
     C3.Pie.make
       ?hole:(if donut then Some "hello" else None)
-      ~columns:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] ()
-    |> C3.Pie.render name in
+      ~sectors:[ "a", 30.; "b", 120.; "c", 15.; "d", 90. ] ()
+    |> C3.Pie.render ~bindto:name in
   ()
 
 let gauge name =

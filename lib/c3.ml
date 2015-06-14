@@ -188,7 +188,7 @@ type kind = [
   | `Area_spline -> "Area spline"
   | `Area_step -> "Area step"
   | `Bar -> "Bar"
-  
+
   type t = {
     points: (float * float) list;
     label: string;
@@ -310,9 +310,9 @@ module Pie = struct
   let add ~label ~value ~t () =
     { t with values = (label, value) :: t.values }
 
-  let make ~columns ?hole () =
+  let make ~sectors ?hole () =
     let t = { empty with hole } in
-    List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t columns
+    List.fold_left (fun acc (label, value) -> add ~label ~value ~t:acc ()) t sectors
 
   let to_chart t =
     let ty = if t.hole = None then `Pie else `Donut in
@@ -326,7 +326,7 @@ module Pie = struct
 
   type display = unit
 
-  let render bindto t = generate bindto (to_chart t)
+  let render ~bindto t = generate bindto (to_chart t)
 end
 
 module Gauge = struct

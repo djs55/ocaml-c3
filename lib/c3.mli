@@ -15,17 +15,23 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 *)
 
 module Pie : sig
-  type t
+  (** Pie charts, with or without a hole in the middle ("donut" charts). *)
 
-  val empty: t
+  type t
+  (** An unrendered pie chart *)
+
+  val make: sectors:(string * float) list -> ?hole:string -> unit -> t
+  (** Create a pie chart with a list of sectors. If [hole] is supplied
+      then the pie chart will be a donut containing a string label. *)
 
   val add: label:string -> value:float -> t:t -> unit -> t
-
-  val make: columns:(string * float) list -> ?hole:string -> unit -> t
+  (** Add a single sector to an unrendered pie chart *)
 
   type display
+  (** A rendered pie chart *)
 
-  val render: string -> t -> display
+  val render: bindto:string -> t -> display
+  (** Render a pie chart in a named <div> *)
 end
 
 module Gauge : sig
