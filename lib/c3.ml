@@ -239,9 +239,15 @@ let js_of_columns columns =
     )))
   )
 
+let js_of_types columns =
+  let open Js.Unsafe in
+  obj (Array.of_list (List.map (fun column ->
+    column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
+  ) columns))
+
 let generate bindto data =
   let columns = js_of_columns data.Chart.columns in
-
+  let types = js_of_types data.Chart.columns in
   let axis =
     Js.Unsafe.(
       match data.Chart.x_axis with
@@ -263,9 +269,7 @@ let generate bindto data =
           "xFormat", inject (Js.string "%s")
         ]) @ [
           "columns", columns;
-          "types", obj (Array.of_list (List.map (fun column ->
-            column.Column.label, inject (Js.string (Column_type.to_string column.Column.ty))
-          ) data.Chart.columns));
+          "types", types;
           "groups", inject @@ Js.array @@ Array.of_list @@ List.map (fun g -> inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string x) g) data.Chart.groups;
         ]
       ) in
@@ -300,15 +304,16 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
           | `OneInOneOut -> []
           | `ToX x -> [ "to", inject (Js.string x) ]
           | `Delete n -> [ "length", inject n ] )
-        @ [ "columns", js_of_columns cols ])
+        @ [ "columns", js_of_columns cols; "types", js_of_types cols ])
       )
     ) in
+  Firebug.console##log(arg);
   Js.Unsafe.meth_call chart "flow" [| arg |]
 
 let load chart cols : unit =
   let arg =
     Js.Unsafe.(obj
-        [| "columns", js_of_columns cols |]
+        [| "columns", js_of_columns cols; "types", js_of_types cols |]
     ) in
   Js.Unsafe.meth_call chart "load" [| arg |]
 

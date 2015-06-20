@@ -123,16 +123,25 @@ let normal () =
       loop 0
     )
 
+let rec range i n =
+  if i >= n then [] else i :: range (i + 1) n
+
+let base =
+  range 0 100
+  |> List.map float_of_int
+  |> List.map (fun x -> x /. 40.)
+
 let timeseries () =
   let chart =
     C3.Line.make ~kind:`Timeseries ~x_format:"%m/%d" ()
     |> C3.Line.render ~bindto:"#timeserieschart" in
+
   let rec update_graph_forever chart t () =
     if t > 10. then return ()
     else begin
-      C3.Line.flow ~segments:[ C3.Segment.make ~label:"sin(t)" ~points:[t, sin t]
-                                 ~kind:`Area_step () ]
-                     ~flow_to:(`Delete 0)
+      let points = List.map (fun x -> x, sin (t +. x)) base in
+      C3.Line.update ~segments:[ C3.Segment.make ~label:"sin(t)" ~points
+                                 ~kind:`Area_spline () ]
                      chart;
       Lwt_js.sleep 0.1
       >>= fun () ->
