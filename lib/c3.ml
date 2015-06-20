@@ -17,7 +17,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 module List = struct
   include List
   (* make List tail recursive *)
-  let map x f = map x f |> rev
+  let map x f = rev_map x f |> rev
 end
 
 module Column_type = struct
