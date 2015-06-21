@@ -292,7 +292,7 @@ let generate bindto data =
 
 type flow_to = [
   | `OneInOneOut
-  | `ToX of string
+  | `ToX of Tic.t
   | `Delete of int
 ]
 
@@ -302,7 +302,7 @@ let flow chart ?(flow_to = `OneInOneOut) cols : unit =
       (Array.of_list
         ((match flow_to with
           | `OneInOneOut -> []
-          | `ToX x -> [ "to", inject (Js.string x) ]
+          | `ToX x -> [ "to", inject (Tic.to_float x) ]
           | `Delete n -> [ "length", inject n ] )
         @ [ "columns", js_of_columns cols; "types", js_of_types cols ])
       )

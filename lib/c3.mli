@@ -85,7 +85,7 @@ end
 
 type flow_to = [
   | `OneInOneOut    (** For every point added, remove the leftmost *)
-  | `ToX of string  (** Move the minimum x co-ordinate to the given value *)
+  | `ToX of [ `Time of float | `X of float ]  (** Move the minimum x co-ordinate to the given value *)
   | `Delete of int  (** Delete exactly n points from the leftmost edge *)
 ]
 
