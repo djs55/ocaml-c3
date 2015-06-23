@@ -80,6 +80,7 @@ module Axis = struct
   type t = {
     ty: Axis_type.t;
     format: string; (* eg '%m/%d' *)
+    label: string option;
   }
 end
 
@@ -253,12 +254,17 @@ let generate bindto data =
       match data.Chart.x_axis with
       | None -> []
       | Some x -> [ "axis", obj [|
-        "x", obj [|
-          "type", inject (Js.string (Axis_type.to_string x.Axis.ty));
-          "tick", obj [|
-            "format", inject (Js.string x.Axis.format)
-          |]
-        |]
+        "x",
+          let props = [
+            "type", inject (Js.string (Axis_type.to_string x.Axis.ty));
+            "tick", obj [|
+              "format", inject (Js.string x.Axis.format)
+            |];
+          ] @ (match x.Axis.label with
+            | None -> []
+            | Some x -> [ "label", inject @@ Js.string @@ x ]
+          ) in
+        obj (Array.of_list props)
       |] ]
     ) in
 
@@ -379,12 +385,13 @@ module Line = struct
 
   type t = {
     kind: kind;
+    x_label: string option;
     x_format: string;
     groups: Segment.t list list;
   }
 
-  let make ?(x_format = "%d") ~kind () =
-    { kind; x_format; groups = [] }
+  let make ?(x_format = "%d") ?x_label ~kind () =
+    { kind; x_format; x_label; groups = [] }
 
   let add ~segment t =
     { t with groups = [ segment ] :: t.groups }
@@ -397,7 +404,7 @@ module Line = struct
     let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
     let ty = match t.kind with `XY -> `Line | `Timeseries -> `Timeseries in
     let x_axis = Some {
-      Axis.ty; format = t.x_format;
+      Axis.ty; format = t.x_format; label = t.x_label;
     } in
     { Chart.empty with Chart.x_axis; columns; groups }
 
