@@ -420,10 +420,10 @@ module Line = struct
     let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
     let ty = match t.kind with `XY -> `Line | `Timeseries -> `Timeseries in
     let x_axis = Some {
-      Axis.ty; format = Some t.x_format; label = t.x_label;
+      Axis.ty = ty; format = Some t.x_format; label = t.x_label;
     } in
     let y_axis = Some {
-      Axis.ty; format = None; label = t.y_label;
+      Axis.ty = `Line; format = None; label = t.y_label;
     } in
     { Chart.empty with Chart.x_axis; y_axis; columns; groups }
 
