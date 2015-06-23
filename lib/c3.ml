@@ -20,6 +20,11 @@ module List = struct
   let map x f = rev_map x f |> rev
 end
 
+module Option = struct
+  let value x ~default = match x with None -> default | Some x -> x
+  let map x ~f = match x with None -> None | Some x -> Some (f x)
+end
+
 module Column_type = struct
   type t = [
     | `Line
@@ -82,6 +87,18 @@ module Axis = struct
     format: string; (* eg '%m/%d' *)
     label: string option;
   }
+
+  let to_obj x =
+    let open Js.Unsafe in
+    [
+      "type", inject (Js.string (Axis_type.to_string x.ty));
+      "tick", obj [|
+        "format", inject (Js.string x.format)
+      |];
+    ] @ (match x.label with
+      | None -> []
+      | Some x -> [ "label", inject @@ Js.string @@ x ]
+    )
 end
 
 module Gauge_info = struct
@@ -156,6 +173,7 @@ end
 module Chart = struct
   type t = {
     x_axis: Axis.t option;
+    y_axis: Axis.t option;
     columns: Column.t list;
     donut: Donut.t option;
     gauge: Gauge_info.t option;
@@ -164,6 +182,7 @@ module Chart = struct
 
   let empty = {
     x_axis = None;
+    y_axis = None;
     columns =
       [ { Column.label = "";
           tics = [];
@@ -249,24 +268,16 @@ let js_of_types columns =
 let generate bindto data =
   let columns = js_of_columns data.Chart.columns in
   let types = js_of_types data.Chart.columns in
+  let x_axis = Option.(value ~default:[] (map ~f:Axis.to_obj data.Chart.x_axis)) in
+  let y_axis = Option.(value ~default:[] (map ~f:Axis.to_obj data.Chart.y_axis)) in
+
   let axis =
-    Js.Unsafe.(
-      match data.Chart.x_axis with
-      | None -> []
-      | Some x -> [ "axis", obj [|
-        "x",
-          let props = [
-            "type", inject (Js.string (Axis_type.to_string x.Axis.ty));
-            "tick", obj [|
-              "format", inject (Js.string x.Axis.format)
-            |];
-          ] @ (match x.Axis.label with
-            | None -> []
-            | Some x -> [ "label", inject @@ Js.string @@ x ]
-          ) in
-        obj (Array.of_list props)
-      |] ]
-    ) in
+    Js.Unsafe.([
+      "axis", obj [|
+        "x", obj (Array.of_list x_axis);
+        "y", obj (Array.of_list y_axis);
+      |]
+    ]) in
 
     let data' =
       Js.Unsafe.(
