@@ -6,9 +6,6 @@ J ?= 2
 setup.data: setup.bin
 	./setup.bin -configure
 
-setup.ml: _oasis
-	oasis setup
-
 distclean: setup.data setup.bin
 	./setup.bin -distclean $(OFLAGS)
 	$(RM) setup.bin
