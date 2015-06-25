@@ -1,14 +1,6 @@
-setup.ml
 setup.bin
 setup.log
 setup.data
-myocamlbuild.ml
 _build
-*.mllib
-*.mldylib
-META
 *.mlpack
-*.byte
-*.native
 *.js
-_tags

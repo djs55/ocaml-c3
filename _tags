@@ -1,0 +1,30 @@
+# OASIS_START
+# DO NOT EDIT (digest: 11da5b7025ccac7e1f0c5a0f809054e6)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library c3
+"lib/c3.cmxs": use_c3
+<lib/*.ml{,i,y}>: package(js_of_ocaml)
+<lib/*.ml{,i,y}>: package(js_of_ocaml.syntax)
+# Executable example
+"example/main.byte": package(js_of_ocaml)
+"example/main.byte": package(js_of_ocaml.syntax)
+"example/main.byte": package(lwt)
+"example/main.byte": use_c3
+<example/*.ml{,i,y}>: package(js_of_ocaml)
+<example/*.ml{,i,y}>: package(js_of_ocaml.syntax)
+<example/*.ml{,i,y}>: package(lwt)
+<example/*.ml{,i,y}>: use_c3
+# OASIS_STOP
