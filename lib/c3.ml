@@ -20,6 +20,11 @@ module List = struct
   let map x f = rev_map x f |> rev
 end
 
+module Option = struct
+  let value x ~default = match x with None -> default | Some x -> x
+  let map x ~f = match x with None -> None | Some x -> Some (f x)
+end
+
 module Column_type = struct
   type t = [
     | `Line
@@ -79,8 +84,25 @@ end
 module Axis = struct
   type t = {
     ty: Axis_type.t;
-    format: string; (* eg '%m/%d' *)
+    format: string option; (* eg '%m/%d' *)
+    label: string option;
   }
+
+  let to_obj x =
+    let open Js.Unsafe in
+    [
+      "type", inject (Js.string (Axis_type.to_string x.ty));
+    ] @ (match x.format with
+      | None -> []
+      | Some x -> [
+        "tick", obj [|
+          "format", inject (Js.string x)
+        |];
+        ]
+    ) @ (match x.label with
+      | None -> []
+      | Some x -> [ "label", inject @@ Js.string @@ x ]
+    )
 end
 
 module Gauge_info = struct
@@ -155,6 +177,7 @@ end
 module Chart = struct
   type t = {
     x_axis: Axis.t option;
+    y_axis: Axis.t option;
     columns: Column.t list;
     donut: Donut.t option;
     gauge: Gauge_info.t option;
@@ -163,6 +186,7 @@ module Chart = struct
 
   let empty = {
     x_axis = None;
+    y_axis = None;
     columns =
       [ { Column.label = "";
           tics = [];
@@ -248,19 +272,16 @@ let js_of_types columns =
 let generate bindto data =
   let columns = js_of_columns data.Chart.columns in
   let types = js_of_types data.Chart.columns in
+  let x_axis = Option.(value ~default:[] (map ~f:Axis.to_obj data.Chart.x_axis)) in
+  let y_axis = Option.(value ~default:[] (map ~f:Axis.to_obj data.Chart.y_axis)) in
+
   let axis =
-    Js.Unsafe.(
-      match data.Chart.x_axis with
-      | None -> []
-      | Some x -> [ "axis", obj [|
-        "x", obj [|
-          "type", inject (Js.string (Axis_type.to_string x.Axis.ty));
-          "tick", obj [|
-            "format", inject (Js.string x.Axis.format)
-          |]
-        |]
-      |] ]
-    ) in
+    Js.Unsafe.([
+      "axis", obj [|
+        "x", obj (Array.of_list x_axis);
+        "y", obj (Array.of_list y_axis);
+      |]
+    ]) in
 
     let data' =
       Js.Unsafe.(
@@ -379,12 +400,14 @@ module Line = struct
 
   type t = {
     kind: kind;
+    x_label: string option;
     x_format: string;
+    y_label: string option;
     groups: Segment.t list list;
   }
 
-  let make ?(x_format = "%d") ~kind () =
-    { kind; x_format; groups = [] }
+  let make ?(x_format = "%d") ?x_label ?y_label ~kind () =
+    { kind; x_format; x_label; y_label; groups = [] }
 
   let add ~segment t =
     { t with groups = [ segment ] :: t.groups }
@@ -397,9 +420,12 @@ module Line = struct
     let groups = List.map (List.map (fun s -> s.Segment.label)) t.groups in
     let ty = match t.kind with `XY -> `Line | `Timeseries -> `Timeseries in
     let x_axis = Some {
-      Axis.ty; format = t.x_format;
+      Axis.ty = ty; format = Some t.x_format; label = t.x_label;
     } in
-    { Chart.empty with Chart.x_axis; columns; groups }
+    let y_axis = Some {
+      Axis.ty = `Line; format = None; label = t.y_label;
+    } in
+    { Chart.empty with Chart.x_axis; y_axis; columns; groups }
 
   type display = kind * unit
 

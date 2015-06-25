@@ -22,7 +22,7 @@ let get_by_id id =
 
 let multichart name =
   let _ =
-    C3.Line.make ~kind:`XY ()
+    C3.Line.make ~kind:`XY ~x_label:"Some x_label" ~y_label:"Some y_label" ()
     |> C3.Line.add_group
        ~segments: [ C3.Segment.make ~kind:`Area_step
                     ~points:[ 0.1,0.1; 0.2,0.2; 0.3,0.3; 0.4,0.2; 0.5,0.1]

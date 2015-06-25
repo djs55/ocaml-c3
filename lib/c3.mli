@@ -99,7 +99,7 @@ module Line : sig
   type t
   (** An unrendered line chart *)
 
-  val make: ?x_format:string -> kind:kind -> unit -> t
+  val make: ?x_format:string -> ?x_label:string -> ?y_label:string -> kind:kind -> unit -> t
   (** Create an unrendered line chart, showing either `Timeseries or `XY data.
       The ?x_format is a format string for the labels on the x axis. *)
 
