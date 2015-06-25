@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 3b439b9763ebb0f68f58b526581553df)
-version = "0.2.1"
+# DO NOT EDIT (digest: 0327ff46e17acb370076e383db416233)
+version = "0.3.0"
 description = "OCaml bindings for the Javascript C3 charting library"
 requires = "js_of_ocaml js_of_ocaml.syntax"
 archive(byte) = "c3.cma"
