@@ -25,6 +25,11 @@ module Option = struct
   let map x ~f = match x with None -> None | Some x -> Some (f x)
 end
 
+(* From jsonm *)
+type json =
+  [ `Null | `Bool of bool | `Float of float| `String of string
+  | `A of json list | `O of (string * json) list ]
+
 module Column_type = struct
   type t = [
     | `Line
@@ -81,6 +86,12 @@ module Axis_type = struct
     | `Line -> "line"
 end
 
+let rec to_js = function
+  | `String x -> Js.Unsafe.inject (Js.string x)
+  | `O map ->
+    let elements = List.map (fun (x, y) -> x, to_js y) map in
+    Js.Unsafe.obj (Array.of_list elements)
+
 module Axis = struct
   type t = {
     ty: Axis_type.t;
@@ -88,21 +99,20 @@ module Axis = struct
     label: string option;
   }
 
-  let to_obj x =
-    let open Js.Unsafe in
+  let to_json x =
     [
-      "type", inject (Js.string (Axis_type.to_string x.ty));
+      "type", `String (Axis_type.to_string x.ty)
     ] @ (match x.format with
       | None -> []
       | Some x -> [
-        "tick", obj [|
-          "format", inject (Js.string x)
-        |];
-        ]
+        "tick", `O [ "format", `String x ]
+      ]
     ) @ (match x.label with
       | None -> []
-      | Some x -> [ "label", inject @@ Js.string @@ x ]
+      | Some x -> [ "label", `String x ]
     )
+
+  let to_obj x = List.map (fun (x, y) -> x, to_js y) (to_json x)
 end
 
 module Gauge_info = struct
