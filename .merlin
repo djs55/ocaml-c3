@@ -1,0 +1,4 @@
+S lib/*
+B _build/*
+
+PKG js_of_ocaml lwt.react

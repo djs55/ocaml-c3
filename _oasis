@@ -9,14 +9,27 @@ Plugins:     META (0.3)
 BuildTools:  ocamlbuild
 PostBuildCommand: ./makejs.sh
 
+Flag react
+  Description: Enable reactive plots
+  Default: true
+
 Library c3
   Path:               lib
   Modules:            C3
   BuildDepends:       js_of_ocaml,js_of_ocaml.syntax
 
+Library "c3-react"
+  FindlibName:        react
+  FindlibParent:      c3
+  Build$:             flag(react)
+  Path:               lib
+  Modules:            C3_react
+  BuildDepends:       c3, lwt.react
+
 Executable example
   Path:               example
+  Build$:             flag(react)
   MainIs:             main.ml
   CompiledObject:     byte
   Install:            false
-  BuildDepends: js_of_ocaml,js_of_ocaml.syntax,lwt,c3
+  BuildDepends: js_of_ocaml,js_of_ocaml.syntax,lwt,c3,c3.react

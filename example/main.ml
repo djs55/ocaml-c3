@@ -149,6 +149,19 @@ let timeseries () =
     end in
   Lwt.async (update_graph_forever chart 0.)
 
+let timeseries_react () =
+  let open Lwt_react in
+  let signal, push = E.create () in
+  let _ =
+    C3_react.Line.make ~kind:`Timeseries ~x_format:"%m/%d" ()
+    |> C3_react.(Line.add ~segment:(Segment.make ~kind:`Line ~signal ~label:"sin(t)" ()))
+    |> C3_react.Line.render ~bindto:"#timeserieschart_react" ~flow:`All in
+  let rec f t () =
+    if t > 10. then Lwt.return ()
+    else Lwt_js.sleep 0.1 >>= fun () -> push (t, sin t) ; f (t +. 0.1) ()
+  in
+  Lwt.async (f 0.)
+
 let _ =
   Dom_html.window##onload <- Dom_html.handler
     (fun _ ->
@@ -162,5 +175,6 @@ let _ =
       xychart `Spline "#xysplinechart";
       normal ();
       timeseries ();
+      timeseries_react ();
       Js._true
     )
