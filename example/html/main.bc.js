@@ -1,0 +1,1 @@
+../../_build/default/example/main.bc.js
