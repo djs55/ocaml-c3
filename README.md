@@ -26,7 +26,7 @@ make
 * serve the example site:
 
 ```
-make run
+make example
 ```
 
 View the example on http://localhost:8080/
