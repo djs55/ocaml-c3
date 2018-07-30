@@ -1,6 +1,8 @@
+.DS_Store
 setup.bin
 setup.log
 setup.data
 _build
 *.mlpack
 *.js
+.merlin

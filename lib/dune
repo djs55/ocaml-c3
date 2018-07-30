@@ -1,0 +1,11 @@
+(library
+ (name        c3)
+ (public_name c3)
+ (wrapped true)
+ ; (preprocess (pps (ppx_deriving ppx_sexp_conv ppx_compare ppx_bin_prot)))
+ (ocamlopt_flags (:standard -O3))
+ ; for displaying short type paths in errors and merlin
+ (flags (:standard -short-paths))
+ (preprocess (pps js_of_ocaml-ppx))
+ (libraries js_of_ocaml js_of_ocaml.syntax js_of_ocaml-lwt)
+)
