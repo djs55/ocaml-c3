@@ -1,0 +1,5 @@
+(library
+  (name        c3)
+  (public_name c3)
+  (libraries   js_of_ocaml)
+  (preprocess (pps js_of_ocaml-ppx)))

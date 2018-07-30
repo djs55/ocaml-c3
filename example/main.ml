@@ -107,7 +107,7 @@ let normal () =
   Lwt.async
     (fun () ->
       let rec loop iterations =
-        for i = 0 to 250 do
+        for _i = 0 to 250 do
           let u_1 = Random.float 1. in
           let u_2 = Random.float 1. in
           (* Box-Muller transform *)
@@ -150,7 +150,7 @@ let timeseries () =
   Lwt.async (update_graph_forever chart 0.)
 
 let _ =
-  Dom_html.window##onload <- Dom_html.handler
+  Dom_html.window##.onload := Dom_html.handler
     (fun _ ->
       multichart "#multichart";
       piechart "#piechart" false;
