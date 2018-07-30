@@ -1,3 +1,6 @@
+0.4.0 (30-07-2018)
+- Update to dune and ppx (@samoht)
+
 0.3.0 (25-06-2015)
 - Fix the `update` function
 - Use a tail recursive List.map, for larger datasets
