@@ -14,6 +14,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 *)
 
+open Js_of_ocaml
+
 module List = struct
   include List
   (* make List tail recursive *)
@@ -119,9 +121,9 @@ module Gauge_info = struct
   let make ?min ?max ?units ?width ?thresholds () =
     { min; max; units; width; thresholds }
 
-  let default = {
-    min = None; max = None; units = None; width = None; thresholds = None;
-  }
+  (* let default = {
+   *   min = None; max = None; units = None; width = None; thresholds = None;
+   * } *)
 
   let to_gauge_obj x =
     let open Js.Unsafe in
@@ -151,8 +153,8 @@ module Gauge_info = struct
     let open Js.Unsafe in
     match x with
     | None -> []
-    | Some { thresholds = None } -> []
-    | Some { thresholds = Some ts } ->
+    | Some { thresholds = None; _ } -> []
+    | Some { thresholds = Some ts; _ } ->
       [ "color", obj [|
         "pattern", inject @@ Js.array @@ Array.of_list @@ List.map (fun x -> inject @@ Js.string @@ snd x) ts;
         "threshold", obj [|
@@ -307,7 +309,7 @@ let generate bindto data =
       ))) in
   Firebug.console##log(arg);
 
-  let c3 = Js.Unsafe.global##c3 in
+  let c3 = Js.Unsafe.global##.c3 in
 
   Js.Unsafe.meth_call c3 "generate" [| arg |]
 

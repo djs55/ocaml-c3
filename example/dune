@@ -1,0 +1,14 @@
+(executables
+ (names main)
+ (js_of_ocaml ( flags (:standard --opt 3
+                       ; --setenv FORCE_DROP_INLINE_TEST=true
+                       --disable genprim
+                       ; --pretty
+                       --no-inline
+                       --debug-info
+                       +nat.js
+                       ; +dynlink.js +toplevel.js
+ )))
+ (libraries  c3 lwt js_of_ocaml js_of_ocaml.syntax)
+ (preprocess (pps js_of_ocaml-ppx))
+)
