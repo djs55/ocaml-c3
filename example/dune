@@ -1,0 +1,9 @@
+(executable
+  (name main)
+  (libraries c3 lwt js_of_ocaml-lwt)
+  (preprocess (pps js_of_ocaml-ppx)))
+
+(alias
+  (name example)
+  (deps main.bc.js (source_tree .))
+  (action (run open index.html)))

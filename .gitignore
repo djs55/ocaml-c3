@@ -1,6 +1,5 @@
-setup.bin
-setup.log
-setup.data
 _build
-*.mlpack
-*.js
+*~
+_opam
+*.install
+.merlin
