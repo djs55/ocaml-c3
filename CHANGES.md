@@ -1,5 +1,6 @@
 0.4.0 (30-07-2018)
 - Update to dune and ppx (@samoht)
+- Update to c3 0.6.6 (@loxs)
 
 0.3.0 (25-06-2015)
 - Fix the `update` function
