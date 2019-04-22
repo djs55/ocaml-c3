@@ -1,0 +1,10 @@
+(executable
+  (name main)
+  (modules main histogram)
+  (libraries c3 lwt js_of_ocaml-lwt)
+  (preprocess (pps js_of_ocaml-ppx)))
+
+(alias
+  (name snakes-and-ladders)
+  (deps main.bc.js (source_tree .))
+  (action (run open index.html)))
