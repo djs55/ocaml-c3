@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Load d3.js and c3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.6/c3.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.6/c3.js"></script>
+
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+
+<script
+ charset="UTF-8"
+ src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/ocaml.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+    <script src="main.bc.js"> </script>
+
+  </head>
+  <body>
+    <p>Snakes and ladders game length</p>
+    <div id="length"></div>
+
+    <p>The code</p>
+    <pre><code class="ocaml">
+(* Source square to destination square.
+   If destination square > source square then this is a ladder.
+   If destination square < source square then this is a snake. *)
+let board = [
+  4,14;
+  9,31;
+  17,7;
+  20,38;
+  28,84;
+  40,59;
+  54,34;
+  62,18;
+  63,81;
+  71,91;
+  87,24;
+  93,73;
+  95,75;
+  99,78;
+]
+
+(* One character play, return the number of turns needed to finish. *)
+let play () =
+  let rec loop pos nturns =
+    let roll = Random.int 6 + 1 in
+    let pos = pos + roll in
+    if pos >= 100
+    then nturns (* we've won *)
+    else
+      (* look for a snake or a ladder *)
+      let pos = try List.assoc pos board with Not_found -> pos in
+      loop pos (nturns + 1) in
+  loop 1 0
+
+module Histogram = struct
+  type t = {
+    bins: int array;
+    start: float;
+    width: float;
+  }
+  let make ~start ~width ~n () =
+    let bins = Array.make n 0 in
+    { start; width; bins }
+  let add ~value t =
+    try
+      (* Discard values which are out of range *)
+      let bin = int_of_float ((value -. t.start) /. t.width) in
+      t.bins.(bin) <- t.bins.(bin) + 1
+    with _ -> ()
+  let to_segment ~label t =
+    let points =
+      t.bins
+      |> Array.to_list
+      |> List.mapi (fun idx v -> let t = float_of_int idx *. t.width +. t.start in t,float_of_int v) in
+
+    C3.Segment.make ~label ~points ~kind:`Bar ()
+  end
+
+(* Build a histogram of game lengths *)
+let length () =
+  let h = Histogram.make ~start:(-1.) ~width:1. ~n:200 () in
+  let label = "Game length" in
+  let chart =
+    C3.Line.make ~kind:`XY ()
+    |> C3.Line.add ~segment:(Histogram.to_segment ~label h)
+    |> C3.Line.render ~bindto:"#length" in
+  Lwt.async
+    (fun () ->
+      let open Lwt.Infix in
+      let rec loop iterations =
+        for _i = 0 to 250 do
+          let nturns = play () in
+          Histogram.add ~value:(float_of_int nturns) h
+        done;
+        C3.Line.update ~segments:[ Histogram.to_segment ~label h ] chart;
+        Lwt_js.sleep 1.
+        >>= fun () ->
+        loop (iterations + 1) in
+      loop 0
+    )
+
+let _ =
+  Dom_html.window##.onload := Dom_html.handler
+    (fun _ ->
+      length ();
+      Js._true
+    )
+    </code></pre>
+  </body>
+</html>
