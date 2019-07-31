@@ -14,6 +14,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 *)
 
 open Lwt
+open Js_of_ocaml
 
 let d = Dom_html.document
 let get_by_id id =
@@ -117,7 +118,7 @@ let normal () =
           Histogram.add ~value:z_1 h;
         done;
         C3.Line.update ~segments:[ Histogram.to_segment h ] chart;
-        Lwt_js.sleep 1.
+        Js_of_ocaml_lwt.Lwt_js.sleep 1.
         >>= fun () ->
         loop (iterations + 1) in
       loop 0
@@ -143,7 +144,7 @@ let timeseries () =
       C3.Line.update ~segments:[ C3.Segment.make ~label:"sin(t)" ~points
                                  ~kind:`Area_spline () ]
                      chart;
-      Lwt_js.sleep 0.1
+      Js_of_ocaml_lwt.Lwt_js.sleep 0.1
       >>= fun () ->
       update_graph_forever chart (t +. 0.1) ()
     end in
